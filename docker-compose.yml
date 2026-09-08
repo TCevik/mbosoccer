@@ -1,0 +1,21 @@
+services:
+  php:
+    build: .
+    ports:
+      - "6767:80"
+    volumes:
+      - .:/var/www/html
+    networks:
+      - app-network
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: mborijnland
+      MYSQL_ROOT_PASSWORD: root
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
