@@ -11,7 +11,7 @@ $pdo = new pdo("mysql:host=$host;dbname=$dbname", $username, $password);
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch     (PDOException $e){ 
     // handle errors
-    echo "foutmelding: "  . $e-getMessage ();
+    echo "foutmelding: "  . $e->getMessage();
 
 }
 
