@@ -24,8 +24,8 @@ try {
 } catch (PDOException $e) {
     // handle errors
     echo "foutmelding: " . $e->getMessage();
-} finally {
+} 
     // close connection
     $pdo = null;
-}
+
 ?>
