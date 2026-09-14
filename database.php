@@ -2,7 +2,7 @@
 $host = "localhost";    // naam van de host
 $dbname = "db";     // naam van de database
 $username = "root";     // gebruikersnaam van de database
-$password = "";         // wachtwoord van de database
+$password = "supergeheim";         // wachtwoord van de database
 
 
 // Maak een nieuwe PDO-verbinding met de database
