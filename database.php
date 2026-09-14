@@ -1,6 +1,6 @@
 <?php
 $host = "localhost";    // naam van de host
-$dbname = "phples";     // naam van de database
+$dbname = "db";     // naam van de database
 $username = "root";     // gebruikersnaam van de database
 $password = "";         // wachtwoord van de database
 
