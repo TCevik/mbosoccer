@@ -26,6 +26,6 @@ try {
     echo "foutmelding: " . $e->getMessage();
 } 
     // close connection
-    $pdo = null;
+    $pdo = null; 
 
 ?>
