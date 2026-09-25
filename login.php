@@ -45,46 +45,46 @@ $pageTitle = "Inloggen";
 require_once __DIR__ . '/includes/header.php';
 ?>
 
-<div style="max-width: 460px; margin: 2rem auto;">
-    <div class="card">
-        <div class="card-header" style="justify-content: center; text-align: center; flex-direction: column;">
-            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">⚽</div>
-            <h2>Inloggen bij MBO Soccer</h2>
+<section style="max-width: 460px; margin: 2rem auto;" aria-labelledby="loginHeading">
+    <article class="card">
+        <header class="card-header" style="justify-content: center; text-align: center; flex-direction: column;">
+            <span style="font-size: 2.5rem; margin-bottom: 0.5rem;" aria-hidden="true">⚽</span>
+            <h2 id="loginHeading">Inloggen bij MBO Soccer</h2>
             <p style="color: var(--text-muted); font-size: 0.88rem;">Toegang voor leden, trainers en medewerkers</p>
-        </div>
+        </header>
 
         <?php if ($error): ?>
-            <div class="alert alert-danger" style="margin-bottom: 1rem;">
+            <aside class="alert alert-danger" role="alert" style="margin-bottom: 1rem;">
                 <span>⚠</span>
                 <p><?= e($error) ?></p>
-            </div>
+            </aside>
         <?php endif; ?>
 
         <form method="POST" action="/login.php">
-            <div class="form-group">
+            <p class="form-group">
                 <label for="email">E-mailadres</label>
                 <input type="email" id="email" name="email" class="form-control" placeholder="bijv. speler@mbosoccer.nl" required autofocus value="<?= e($_POST['email'] ?? '') ?>">
-            </div>
+            </p>
 
-            <div class="form-group">
+            <p class="form-group">
                 <label for="password">Wachtwoord</label>
                 <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required>
-            </div>
+            </p>
 
             <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.75rem;">Inloggen</button>
         </form>
 
-        <div style="margin-top: 1.5rem; text-align: center; font-size: 0.88rem; color: var(--text-muted);">
+        <footer style="margin-top: 1.5rem; text-align: center; font-size: 0.88rem; color: var(--text-muted);">
             Nog geen lid van MBO Soccer? <a href="/register.php"><strong>Schrijf je hier in</strong></a>
-        </div>
+        </footer>
 
-        <div style="margin-top: 1.5rem; padding: 0.75rem; background: #f8fafc; border-radius: var(--radius-sm); font-size: 0.8rem; border: 1px dashed var(--border);">
+        <aside style="margin-top: 1.5rem; padding: 0.75rem; background: #f8fafc; border-radius: var(--radius-sm); font-size: 0.8rem; border: 1px dashed var(--border);">
             <strong>Demo testaccounts:</strong><br>
             • Beheerder: <code>admin@mbosoccer.nl</code> / <code>Admin123!</code><br>
             • Trainer: <code>trainer@mbosoccer.nl</code> / <code>Trainer123!</code><br>
             • Speler: <code>speler@mbosoccer.nl</code> / <code>Speler123!</code>
-        </div>
-    </div>
-</div>
+        </aside>
+    </article>
+</section>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

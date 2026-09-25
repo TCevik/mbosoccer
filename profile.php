@@ -51,75 +51,79 @@ require_once __DIR__ . '/includes/header.php';
 ?>
 
 <div style="max-width: 800px; margin: 0 auto;">
-    <div class="card">
-        <div class="card-header">
+    <article class="card">
+        <header class="card-header">
             <h2>Mijn Account & Profiel</h2>
             <span class="role-badge role-<?= e($currentUserData['role']) ?>"><?= e(strtoupper($currentUserData['role'])) ?></span>
-        </div>
+        </header>
 
         <?php if ($error): ?>
-            <div class="alert alert-danger">
+            <aside class="alert alert-danger" role="alert">
                 <span>⚠</span>
                 <p><?= e($error) ?></p>
-            </div>
+            </aside>
         <?php endif; ?>
 
         <?php if ($success): ?>
-            <div class="alert alert-success">
+            <aside class="alert alert-success" role="alert">
                 <span>✓</span>
                 <p><?= e($success) ?></p>
-            </div>
+            </aside>
         <?php endif; ?>
 
         <form method="POST" action="/profile.php">
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="name">Volledige Naam</label>
-                    <input type="text" id="name" name="name" class="form-control" required value="<?= e($currentUserData['name']) ?>">
+            <fieldset style="border: none; padding: 0; margin: 0;">
+                <div class="form-grid">
+                    <p class="form-group">
+                        <label for="name">Volledige Naam</label>
+                        <input type="text" id="name" name="name" class="form-control" required value="<?= e($currentUserData['name']) ?>">
+                    </p>
+
+                    <p class="form-group">
+                        <label for="email">E-mailadres (onwijzigbaar)</label>
+                        <input type="email" id="email" class="form-control" disabled value="<?= e($currentUserData['email']) ?>" style="background: #f1f5f9;">
+                    </p>
                 </div>
 
-                <div class="form-group">
-                    <label for="email">E-mailadres (onwijzigbaar)</label>
-                    <input type="email" id="email" class="form-control" disabled value="<?= e($currentUserData['email']) ?>" style="background: #f1f5f9;">
-                </div>
-            </div>
+                <div class="form-grid">
+                    <p class="form-group">
+                        <label for="phone">Telefoonnummer</label>
+                        <input type="tel" id="phone" name="phone" class="form-control" value="<?= e($currentUserData['phone'] ?? '') ?>">
+                    </p>
 
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="phone">Telefoonnummer</label>
-                    <input type="tel" id="phone" name="phone" class="form-control" value="<?= e($currentUserData['phone'] ?? '') ?>">
+                    <p class="form-group">
+                        <label for="birthdate">Geboortedatum</label>
+                        <input type="date" id="birthdate" name="birthdate" class="form-control" value="<?= e($currentUserData['birthdate'] ?? '') ?>">
+                    </p>
                 </div>
-
-                <div class="form-group">
-                    <label for="birthdate">Geboortedatum</label>
-                    <input type="date" id="birthdate" name="birthdate" class="form-control" value="<?= e($currentUserData['birthdate'] ?? '') ?>">
-                </div>
-            </div>
+            </fieldset>
 
             <hr style="margin: 1.5rem 0; border: none; border-top: 1px solid var(--border);">
-            <h4 style="margin-bottom: 1rem;">Wachtwoord wijzigen (optioneel)</h4>
+            
+            <fieldset style="border: none; padding: 0; margin: 0;">
+                <legend style="margin-bottom: 1rem; font-weight: 700; font-size: 1.1rem;">Wachtwoord wijzigen (optioneel)</legend>
+                <div class="form-grid">
+                    <p class="form-group">
+                        <label for="new_password">Nieuw Wachtwoord</label>
+                        <input type="password" id="new_password" name="new_password" class="form-control" placeholder="Leeg laten om te behouden">
+                    </p>
 
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="new_password">Nieuw Wachtwoord</label>
-                    <input type="password" id="new_password" name="new_password" class="form-control" placeholder="Leeg laten om te behouden">
+                    <p class="form-group">
+                        <label for="confirm_password">Bevestig Nieuw Wachtwoord</label>
+                        <input type="password" id="confirm_password" name="confirm_password" class="form-control" placeholder="Herhaal nieuw wachtwoord">
+                    </p>
                 </div>
-
-                <div class="form-group">
-                    <label for="confirm_password">Bevestig Nieuw Wachtwoord</label>
-                    <input type="password" id="confirm_password" name="confirm_password" class="form-control" placeholder="Herhaal nieuw wachtwoord">
-                </div>
-            </div>
+            </fieldset>
 
             <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">Wijzigingen Opslaan</button>
         </form>
-    </div>
+    </article>
 
     <!-- Mijn Teams -->
-    <div class="card">
-        <div class="card-header">
+    <article class="card">
+        <header class="card-header">
             <h3>Mijn Teams & Rol in het Veld</h3>
-        </div>
+        </header>
         <?php if (empty($myTeams)): ?>
             <p style="color: var(--text-muted);">Je bent momenteel nog niet ingedeeld bij een specifiek team. Neem contact op met de trainer of clubmedewerker.</p>
         <?php else: ?>
@@ -127,10 +131,10 @@ require_once __DIR__ . '/includes/header.php';
                 <table class="table">
                     <thead>
                         <tr>
-                            <th>Team</th>
-                            <th>Klasse</th>
-                            <th>Positie</th>
-                            <th>Rugnummer</th>
+                            <th scope="col">Team</th>
+                            <th scope="col">Klasse</th>
+                            <th scope="col">Positie</th>
+                            <th scope="col">Rugnummer</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -146,7 +150,7 @@ require_once __DIR__ . '/includes/header.php';
                 </table>
             </div>
         <?php endif; ?>
-    </div>
+    </article>
 </div>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

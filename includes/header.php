@@ -39,7 +39,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                             <button class="dropdown-btn <?= str_starts_with($_SERVER['REQUEST_URI'], '/admin') ? 'active' : '' ?>">
                                 Beheer ▾
                             </button>
-                            <div class="dropdown-content">
+                            <nav class="dropdown-content" aria-label="Beheermenu">
                                 <a href="/admin/dashboard.php">Overzicht / Dashboard</a>
                                 <a href="/admin/matches.php">Wedstrijden</a>
                                 <a href="/admin/teams.php">Teams & Opstellingen</a>
@@ -47,7 +47,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                                 <?php if ($user['role'] === 'medewerker'): ?>
                                     <a href="/admin/members.php">Ledenbeheer</a>
                                 <?php endif; ?>
-                            </div>
+                            </nav>
                         </div>
                     <?php endif; ?>
 
@@ -70,19 +70,19 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
     <main class="main-wrapper">
         <?php if (!empty($_SESSION['flash_success'])): ?>
-            <div class="alert alert-success">
+            <aside class="alert alert-success" role="alert">
                 <span>✓</span>
                 <p><?= e($_SESSION['flash_success']) ?></p>
-                <button class="alert-close" onclick="this.parentElement.remove()">×</button>
-            </div>
+                <button type="button" class="alert-close" onclick="this.parentElement.remove()" aria-label="Sluiten">×</button>
+            </aside>
             <?php unset($_SESSION['flash_success']); ?>
         <?php endif; ?>
 
         <?php if (!empty($_SESSION['flash_error'])): ?>
-            <div class="alert alert-danger">
+            <aside class="alert alert-danger" role="alert">
                 <span>⚠</span>
                 <p><?= e($_SESSION['flash_error']) ?></p>
-                <button class="alert-close" onclick="this.parentElement.remove()">×</button>
-            </div>
+                <button type="button" class="alert-close" onclick="this.parentElement.remove()" aria-label="Sluiten">×</button>
+            </aside>
             <?php unset($_SESSION['flash_error']); ?>
         <?php endif; ?>

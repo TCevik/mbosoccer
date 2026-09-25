@@ -18,58 +18,58 @@ $teams = $teamModel->getAll();
 $upcomingMatches = $matchModel->getUpcoming(5);
 ?>
 
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+<header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
     <div>
         <h2>Beheerdersoverzicht</h2>
         <p style="color: var(--text-muted);">Welkom op de beheerdersomgeving van MBO Soccer.</p>
     </div>
-    <div style="display: flex; gap: 0.75rem;">
+    <nav style="display: flex; gap: 0.75rem;" aria-label="Beheersacties">
         <a href="/admin/matches.php?action=create" class="btn btn-primary">+ Wedstrijd Plannen</a>
         <?php if ($user['role'] === 'medewerker'): ?>
             <a href="/admin/members.php" class="btn btn-secondary">👥 Ledenbeheer</a>
         <?php endif; ?>
-    </div>
-</div>
+    </nav>
+</header>
 
-<div class="stats-grid">
-    <div class="stat-card">
-        <div class="stat-icon">👥</div>
+<section class="stats-grid" aria-label="Dashboard statistieken">
+    <article class="stat-card">
+        <span class="stat-icon" aria-hidden="true">👥</span>
         <div>
-            <div class="stat-val"><?= $totalUsers ?></div>
-            <div class="stat-lbl">Totaal Geregistreerde Leden</div>
+            <strong class="stat-val"><?= $totalUsers ?></strong>
+            <span class="stat-lbl">Totaal Geregistreerde Leden</span>
         </div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon">🏆</div>
+    </article>
+    <article class="stat-card">
+        <span class="stat-icon" aria-hidden="true">🏆</span>
         <div>
-            <div class="stat-val"><?= count($teams) ?></div>
-            <div class="stat-lbl">Actieve Teams</div>
+            <strong class="stat-val"><?= count($teams) ?></strong>
+            <span class="stat-lbl">Actieve Teams</span>
         </div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon">⚽</div>
+    </article>
+    <article class="stat-card">
+        <span class="stat-icon" aria-hidden="true">⚽</span>
         <div>
-            <div class="stat-val"><?= $totalMatches ?></div>
-            <div class="stat-lbl">Geplande / Gespeelde Wedstrijden</div>
+            <strong class="stat-val"><?= $totalMatches ?></strong>
+            <span class="stat-lbl">Geplande / Gespeelde Wedstrijden</span>
         </div>
-    </div>
-</div>
+    </article>
+</section>
 
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.5rem;">
+<section style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.5rem;" aria-label="Wedstrijden en Teams Overzicht">
     <!-- Recente/Komende wedstrijden -->
-    <div class="card">
-        <div class="card-header">
+    <article class="card">
+        <header class="card-header">
             <h3>⚽ Komende Wedstrijden & Aanwezigheid</h3>
             <a href="/admin/matches.php" class="btn btn-sm btn-outline">Beheer alles →</a>
-        </div>
+        </header>
         <div class="table-responsive">
             <table class="table">
                 <thead>
                     <tr>
-                        <th>Datum</th>
-                        <th>Team vs Tegenstander</th>
-                        <th>Aanwezigheid</th>
-                        <th>Acties</th>
+                        <th scope="col">Datum</th>
+                        <th scope="col">Team vs Tegenstander</th>
+                        <th scope="col">Aanwezigheid</th>
+                        <th scope="col">Acties</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -97,22 +97,22 @@ $upcomingMatches = $matchModel->getUpcoming(5);
                 </tbody>
             </table>
         </div>
-    </div>
+    </article>
 
     <!-- Teams Overzicht -->
-    <div class="card">
-        <div class="card-header">
+    <article class="card">
+        <header class="card-header">
             <h3>🏆 Teams & Selecties</h3>
             <a href="/admin/teams.php" class="btn btn-sm btn-outline">Beheer teams →</a>
-        </div>
+        </header>
         <div class="table-responsive">
             <table class="table">
                 <thead>
                     <tr>
-                        <th>Team</th>
-                        <th>Trainer</th>
-                        <th>Spelers</th>
-                        <th>Actie</th>
+                        <th scope="col">Team</th>
+                        <th scope="col">Trainer</th>
+                        <th scope="col">Spelers</th>
+                        <th scope="col">Actie</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -129,7 +129,7 @@ $upcomingMatches = $matchModel->getUpcoming(5);
                 </tbody>
             </table>
         </div>
-    </div>
-</div>
+    </article>
+</section>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>

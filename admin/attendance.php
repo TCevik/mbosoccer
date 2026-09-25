@@ -18,14 +18,14 @@ $playerAttendance = $selectedMatchId > 0 ? $attendanceModel->getAttendanceForMat
 $stats = $selectedMatchId > 0 ? $attendanceModel->getStatsForMatch($selectedMatchId) : null;
 ?>
 
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+<header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
     <div>
         <h2>Aanwezigheid van Leden</h2>
         <p style="color: var(--text-muted);">Inzicht in wie wel en niet aanwezig is bij de wedstrijden.</p>
     </div>
-</div>
+</header>
 
-<div class="card" style="margin-bottom: 1.5rem;">
+<section class="card" style="margin-bottom: 1.5rem;" aria-label="Wedstrijdselectie">
     <form method="GET" action="/admin/attendance.php" style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
         <label for="match_id" style="font-weight: 700;">Selecteer Wedstrijd:</label>
         <select name="match_id" id="match_id" class="form-control" style="max-width: 450px;" onchange="this.form.submit()">
@@ -36,53 +36,53 @@ $stats = $selectedMatchId > 0 ? $attendanceModel->getStatsForMatch($selectedMatc
             <?php endforeach; ?>
         </select>
     </form>
-</div>
+</section>
 
 <?php if ($currentMatch): ?>
     <!-- Wedstrijd Samenvatting & KPI's -->
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-icon" style="background: var(--primary-light); color: var(--primary-dark);">✓</div>
+    <section class="stats-grid" aria-label="Aanwezigheidsstatistieken">
+        <article class="stat-card">
+            <span class="stat-icon" style="background: var(--primary-light); color: var(--primary-dark);" aria-hidden="true">✓</span>
             <div>
-                <div class="stat-val"><?= (int)($stats['present_count'] ?? 0) ?></div>
-                <div class="stat-lbl">Spelers Aanwezig</div>
+                <strong class="stat-val"><?= (int)($stats['present_count'] ?? 0) ?></strong>
+                <span class="stat-lbl">Spelers Aanwezig</span>
             </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon" style="background: var(--danger-light); color: var(--danger);">✕</div>
+        </article>
+        <article class="stat-card">
+            <span class="stat-icon" style="background: var(--danger-light); color: var(--danger);" aria-hidden="true">✕</span>
             <div>
-                <div class="stat-val"><?= (int)($stats['absent_count'] ?? 0) ?></div>
-                <div class="stat-lbl">Spelers Afgemeld</div>
+                <strong class="stat-val"><?= (int)($stats['absent_count'] ?? 0) ?></strong>
+                <span class="stat-lbl">Spelers Afgemeld</span>
             </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon" style="background: #fef3c7; color: #b45309;">?</div>
+        </article>
+        <article class="stat-card">
+            <span class="stat-icon" style="background: #fef3c7; color: #b45309;" aria-hidden="true">?</span>
             <div>
-                <div class="stat-val"><?= (int)($stats['unknown_count'] ?? 0) ?></div>
-                <div class="stat-lbl">Nog Geen Reactie</div>
+                <strong class="stat-val"><?= (int)($stats['unknown_count'] ?? 0) ?></strong>
+                <span class="stat-lbl">Nog Geen Reactie</span>
             </div>
-        </div>
-    </div>
+        </article>
+    </section>
 
     <!-- Aanwezigheidslijst -->
-    <div class="card">
-        <div class="card-header">
+    <article class="card">
+        <header class="card-header">
             <h3>Spelerslijst: <?= e($currentMatch['team_name']) ?> vs <?= e($currentMatch['opponent']) ?></h3>
             <span class="badge <?= $currentMatch['location'] === 'Thuis' ? 'badge-success' : 'badge-warning' ?>">
                 <?= e($currentMatch['location']) ?> - <?= e($currentMatch['field_number']) ?>
             </span>
-        </div>
+        </header>
 
         <div class="table-responsive">
             <table class="table">
                 <thead>
                     <tr>
-                        <th>Rugnr</th>
-                        <th>Spelersnaam</th>
-                        <th>Positie</th>
-                        <th>Status</th>
-                        <th>Reden / Notitie</th>
-                        <th>Laatst Bijgewerkt</th>
+                        <th scope="col">Rugnr</th>
+                        <th scope="col">Spelersnaam</th>
+                        <th scope="col">Positie</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Reden / Notitie</th>
+                        <th scope="col">Laatst Bijgewerkt</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -111,11 +111,11 @@ $stats = $selectedMatchId > 0 ? $attendanceModel->getStatsForMatch($selectedMatc
                 </tbody>
             </table>
         </div>
-    </div>
+    </article>
 <?php else: ?>
-    <div class="card">
+    <section class="card">
         <p>Geen wedstrijd geselecteerd of beschikbaar.</p>
-    </div>
+    </section>
 <?php endif; ?>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>

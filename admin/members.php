@@ -65,104 +65,108 @@ $pageTitle = "Ledenbeheer";
 require_once __DIR__ . '/../includes/header.php';
 ?>
 
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+<header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
     <div>
         <h2>Ledenbeheer</h2>
         <p style="color: var(--text-muted);">Beheer alle leden, trainers en medewerkers van VV MBO Soccer.</p>
     </div>
-    <div>
+    <nav aria-label="Leden acties">
         <?php if ($action === 'create' || $action === 'edit'): ?>
             <a href="/admin/members.php" class="btn btn-outline">← Terug naar ledenlijst</a>
         <?php else: ?>
             <a href="/admin/members.php?action=create" class="btn btn-primary">+ Nieuw Lid Toevoegen</a>
         <?php endif; ?>
-    </div>
-</div>
+    </nav>
+</header>
 
 <?php if ($action === 'create' || $action === 'edit'): ?>
-    <div class="card" style="max-width: 650px; margin: 0 auto;">
-        <div class="card-header">
+    <article class="card" style="max-width: 650px; margin: 0 auto;">
+        <header class="card-header">
             <h3><?= $action === 'edit' ? 'Lid Bewerken' : 'Nieuw Lid Toevoegen' ?></h3>
-        </div>
+        </header>
 
         <form method="POST" action="/admin/members.php<?= $editId ? '?id=' . $editId : '' ?>">
             <input type="hidden" name="form_action" value="save">
 
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="name">Volledige Naam *</label>
-                    <input type="text" id="name" name="name" class="form-control" required value="<?= e($editUser['name'] ?? '') ?>">
+            <fieldset style="border: none; padding: 0; margin: 0;">
+                <div class="form-grid">
+                    <p class="form-group">
+                        <label for="name">Volledige Naam *</label>
+                        <input type="text" id="name" name="name" class="form-control" required value="<?= e($editUser['name'] ?? '') ?>">
+                    </p>
+
+                    <p class="form-group">
+                        <label for="email">E-mailadres *</label>
+                        <input type="email" id="email" name="email" class="form-control" required value="<?= e($editUser['email'] ?? '') ?>">
+                    </p>
                 </div>
 
-                <div class="form-group">
-                    <label for="email">E-mailadres *</label>
-                    <input type="email" id="email" name="email" class="form-control" required value="<?= e($editUser['email'] ?? '') ?>">
-                </div>
-            </div>
+                <div class="form-grid">
+                    <p class="form-group">
+                        <label for="role">Rol in het systeem *</label>
+                        <select name="role" id="role" class="form-control" required>
+                            <option value="lid" <?= ($editUser && $editUser['role'] === 'lid') ? 'selected' : '' ?>>Lid (Speler)</option>
+                            <option value="trainer" <?= ($editUser && $editUser['role'] === 'trainer') ? 'selected' : '' ?>>Trainer / Coach</option>
+                            <option value="medewerker" <?= ($editUser && $editUser['role'] === 'medewerker') ? 'selected' : '' ?>>Clubmedewerker (Beheerder)</option>
+                        </select>
+                    </p>
 
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="role">Rol in het systeem *</label>
-                    <select name="role" id="role" class="form-control" required>
-                        <option value="lid" <?= ($editUser && $editUser['role'] === 'lid') ? 'selected' : '' ?>>Lid (Speler)</option>
-                        <option value="trainer" <?= ($editUser && $editUser['role'] === 'trainer') ? 'selected' : '' ?>>Trainer / Coach</option>
-                        <option value="medewerker" <?= ($editUser && $editUser['role'] === 'medewerker') ? 'selected' : '' ?>>Clubmedewerker (Beheerder)</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="phone">Telefoonnummer</label>
-                    <input type="tel" id="phone" name="phone" class="form-control" value="<?= e($editUser['phone'] ?? '') ?>">
-                </div>
-            </div>
-
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="birthdate">Geboortedatum</label>
-                    <input type="date" id="birthdate" name="birthdate" class="form-control" value="<?= e($editUser['birthdate'] ?? '') ?>">
+                    <p class="form-group">
+                        <label for="phone">Telefoonnummer</label>
+                        <input type="tel" id="phone" name="phone" class="form-control" value="<?= e($editUser['phone'] ?? '') ?>">
+                    </p>
                 </div>
 
-                <?php if ($action === 'create'): ?>
-                    <div class="form-group">
-                        <label for="password">Standaard Wachtwoord *</label>
-                        <input type="text" id="password" name="password" class="form-control" value="Welkom123!" required>
-                        <small style="color: var(--text-muted);">Het lid kan dit zelf wijzigen na inloggen.</small>
-                    </div>
-                <?php endif; ?>
-            </div>
+                <div class="form-grid">
+                    <p class="form-group">
+                        <label for="birthdate">Geboortedatum</label>
+                        <input type="date" id="birthdate" name="birthdate" class="form-control" value="<?= e($editUser['birthdate'] ?? '') ?>">
+                    </p>
 
-            <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1rem;">
+                    <?php if ($action === 'create'): ?>
+                        <p class="form-group">
+                            <label for="password">Standaard Wachtwoord *</label>
+                            <input type="text" id="password" name="password" class="form-control" value="Welkom123!" required>
+                            <small style="color: var(--text-muted);">Het lid kan dit zelf wijzigen na inloggen.</small>
+                        </p>
+                    <?php endif; ?>
+                </div>
+            </fieldset>
+
+            <footer style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1rem;">
                 <a href="/admin/members.php" class="btn btn-outline">Annuleren</a>
                 <button type="submit" class="btn btn-primary"><?= $action === 'edit' ? 'Opslaan' : 'Toevoegen' ?></button>
-            </div>
+            </footer>
         </form>
-    </div>
+    </article>
 
 <?php else: ?>
     <!-- Filteren & Ledenlijst -->
-    <div class="card">
-        <div class="card-header" style="flex-wrap: wrap; gap: 1rem;">
-            <div style="display: flex; gap: 0.5rem; align-items: center;">
+    <section class="card" aria-labelledby="membersListTitle">
+        <header class="card-header" style="flex-wrap: wrap; gap: 1rem;">
+            <nav style="display: flex; gap: 0.5rem; align-items: center;" aria-label="Leden filteren op rol">
                 <a href="/admin/members.php" class="btn btn-sm <?= empty($roleFilter) ? 'btn-secondary' : 'btn-outline' ?>">Alle (<?= count($allMembers) ?>)</a>
                 <a href="/admin/members.php?role=lid" class="btn btn-sm <?= $roleFilter === 'lid' ? 'btn-secondary' : 'btn-outline' ?>">Spelers</a>
                 <a href="/admin/members.php?role=trainer" class="btn btn-sm <?= $roleFilter === 'trainer' ? 'btn-secondary' : 'btn-outline' ?>">Trainers</a>
                 <a href="/admin/members.php?role=medewerker" class="btn btn-sm <?= $roleFilter === 'medewerker' ? 'btn-secondary' : 'btn-outline' ?>">Medewerkers</a>
-            </div>
+            </nav>
 
-            <input type="text" class="form-control" style="max-width: 250px;" placeholder="Zoek op naam of mail..." data-table-filter="#membersTable">
-        </div>
+            <search style="max-width: 250px;">
+                <input type="search" class="form-control" placeholder="Zoek op naam of mail..." data-table-filter="#membersTable" aria-label="Zoek in ledenlijst">
+            </search>
+        </header>
 
         <div class="table-responsive">
             <table class="table" id="membersTable">
                 <thead>
                     <tr>
-                        <th>Naam</th>
-                        <th>E-mail</th>
-                        <th>Rol</th>
-                        <th>Telefoon</th>
-                        <th>Geboortedatum</th>
-                        <th>Lid sinds</th>
-                        <th>Acties</th>
+                        <th scope="col">Naam</th>
+                        <th scope="col">E-mail</th>
+                        <th scope="col">Rol</th>
+                        <th scope="col">Telefoon</th>
+                        <th scope="col">Geboortedatum</th>
+                        <th scope="col">Lid sinds</th>
+                        <th scope="col">Acties</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -191,7 +195,7 @@ require_once __DIR__ . '/../includes/header.php';
                 </tbody>
             </table>
         </div>
-    </div>
+    </section>
 <?php endif; ?>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>

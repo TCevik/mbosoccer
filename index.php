@@ -33,44 +33,44 @@ $allTeams = $teamModel->getAll();
     </div>
 </section>
 
-<div class="stats-grid">
-    <div class="stat-card">
-        <div class="stat-icon">👥</div>
+<section class="stats-grid" aria-label="Club statistieken">
+    <article class="stat-card">
+        <span class="stat-icon" aria-hidden="true">👥</span>
         <div>
-            <div class="stat-val"><?= $totalMembers ?></div>
-            <div class="stat-lbl">Actieve Clubleden</div>
+            <strong class="stat-val"><?= $totalMembers ?></strong>
+            <span class="stat-lbl">Actieve Clubleden</span>
         </div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon">🏆</div>
+    </article>
+    <article class="stat-card">
+        <span class="stat-icon" aria-hidden="true">🏆</span>
         <div>
-            <div class="stat-val"><?= count($allTeams) ?></div>
-            <div class="stat-lbl">Competitieteams</div>
+            <strong class="stat-val"><?= count($allTeams) ?></strong>
+            <span class="stat-lbl">Competitieteams</span>
         </div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon">📅</div>
+    </article>
+    <article class="stat-card">
+        <span class="stat-icon" aria-hidden="true">📅</span>
         <div>
-            <div class="stat-val"><?= $totalMatches ?></div>
-            <div class="stat-lbl">Wedstrijden Gepland</div>
+            <strong class="stat-val"><?= $totalMatches ?></strong>
+            <span class="stat-lbl">Wedstrijden Gepland</span>
         </div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon">⚡</div>
+    </article>
+    <article class="stat-card">
+        <span class="stat-icon" aria-hidden="true">⚡</span>
         <div>
-            <div class="stat-val">100%</div>
-            <div class="stat-lbl">Digitaal & Veilig (OOP)</div>
+            <strong class="stat-val">100%</strong>
+            <span class="stat-lbl">Digitaal & Veilig (OOP)</span>
         </div>
-    </div>
-</div>
+    </article>
+</section>
 
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
+<section style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;" aria-label="Wedstrijden en Teams">
     <!-- Eerstvolgende wedstrijden -->
-    <div class="card">
-        <div class="card-header">
+    <article class="card">
+        <header class="card-header">
             <h3>⚽ Eerstvolgende Wedstrijden</h3>
             <a href="/schedule.php" class="btn btn-sm btn-outline">Alles bekijken →</a>
-        </div>
+        </header>
         <?php if (empty($upcomingMatches)): ?>
             <p style="color: var(--text-muted);">Er staan momenteel geen geplande wedstrijden op het programma.</p>
         <?php else: ?>
@@ -78,10 +78,10 @@ $allTeams = $teamModel->getAll();
                 <table class="table">
                     <thead>
                         <tr>
-                            <th>Datum & Tijd</th>
-                            <th>Team</th>
-                            <th>Tegenstander</th>
-                            <th>Locatie</th>
+                            <th scope="col">Datum & Tijd</th>
+                            <th scope="col">Team</th>
+                            <th scope="col">Tegenstander</th>
+                            <th scope="col">Locatie</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -101,21 +101,21 @@ $allTeams = $teamModel->getAll();
                 </table>
             </div>
         <?php endif; ?>
-    </div>
+    </article>
 
     <!-- Onze Teams -->
-    <div class="card">
-        <div class="card-header">
+    <article class="card">
+        <header class="card-header">
             <h3>📋 Onze Teams</h3>
-        </div>
+        </header>
         <div class="table-responsive">
             <table class="table">
                 <thead>
                     <tr>
-                        <th>Team</th>
-                        <th>Klasse</th>
-                        <th>Trainer</th>
-                        <th>Spelers</th>
+                        <th scope="col">Team</th>
+                        <th scope="col">Klasse</th>
+                        <th scope="col">Trainer</th>
+                        <th scope="col">Spelers</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -130,7 +130,7 @@ $allTeams = $teamModel->getAll();
                 </tbody>
             </table>
         </div>
-    </div>
-</div>
+    </article>
+</section>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

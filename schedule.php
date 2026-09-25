@@ -13,30 +13,30 @@ $matches = $matchModel->getUpcoming(20, $userId);
 $trainings = $trainingModel->getUpcoming(20, $userId);
 ?>
 
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+<header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
     <div>
         <h2>Wedstrijd- & Trainingsschema</h2>
         <p style="color: var(--text-muted);">Bekijk de geplande wedstrijden en trainingen. Geef direct je beschikbaarheid door!</p>
     </div>
 
-    <div style="max-width: 280px; width: 100%;">
-        <input type="text" class="form-control" placeholder="🔍 Filter op team of tegenstander..." data-table-filter="#matchesTable">
-    </div>
-</div>
+    <search style="max-width: 280px; width: 100%;">
+        <input type="search" class="form-control" placeholder="🔍 Filter op team of tegenstander..." data-table-filter="#matchesTable" aria-label="Wedstrijden filteren">
+    </search>
+</header>
 
 <?php if (!$user): ?>
-    <div class="alert alert-danger" style="background: #fef3c7; color: #92400e; border-color: #fde68a;">
+    <aside class="alert alert-danger" role="note" style="background: #fef3c7; color: #92400e; border-color: #fde68a;">
         <span>ℹ️</span>
         <p><strong>Tip:</strong> <a href="/login.php" style="text-decoration: underline;">Log in</a> om direct per wedstrijd aan te geven of je wel of niet aanwezig bent.</p>
-    </div>
+    </aside>
 <?php endif; ?>
 
 <!-- Wedstrijden -->
-<div class="card">
-    <div class="card-header">
-        <h3>⚽ Komende Wedstrijden</h3>
+<section class="card" aria-labelledby="matchesSectionTitle">
+    <header class="card-header">
+        <h3 id="matchesSectionTitle">⚽ Komende Wedstrijden</h3>
         <span class="badge badge-info"><?= count($matches) ?> gepland</span>
-    </div>
+    </header>
 
     <?php if (empty($matches)): ?>
         <p style="color: var(--text-muted); padding: 1rem;">Er zijn momenteel geen aankomende wedstrijden gevonden.</p>
@@ -45,13 +45,13 @@ $trainings = $trainingModel->getUpcoming(20, $userId);
             <table class="table" id="matchesTable">
                 <thead>
                     <tr>
-                        <th>Datum & Tijd</th>
-                        <th>Team</th>
-                        <th>Tegenstander</th>
-                        <th>Locatie / Veld</th>
-                        <th>Opmerking</th>
+                        <th scope="col">Datum & Tijd</th>
+                        <th scope="col">Team</th>
+                        <th scope="col">Tegenstander</th>
+                        <th scope="col">Locatie / Veld</th>
+                        <th scope="col">Opmerking</th>
                         <?php if ($user): ?>
-                            <th style="min-width: 220px;">Mijn Aanwezigheid</th>
+                            <th scope="col" style="min-width: 220px;">Mijn Aanwezigheid</th>
                         <?php endif; ?>
                     </tr>
                 </thead>
@@ -70,13 +70,13 @@ $trainings = $trainingModel->getUpcoming(20, $userId);
                             <td><small><?= e($m['notes'] ?: '-') ?></small></td>
                             <?php if ($user): ?>
                                 <td>
-                                    <div class="attendance-actions" style="display: flex; align-items: center; gap: 0.5rem;">
-                                        <button class="btn btn-sm btn-attendance <?= ($m['user_status'] ?? '') === 'aanwezig' ? 'btn-primary' : 'btn-outline' ?>"
+                                    <form class="attendance-actions" style="display: flex; align-items: center; gap: 0.5rem;" onsubmit="return false;">
+                                        <button type="button" class="btn btn-sm btn-attendance <?= ($m['user_status'] ?? '') === 'aanwezig' ? 'btn-primary' : 'btn-outline' ?>"
                                                 data-match-id="<?= $m['id'] ?>"
                                                 data-status="aanwezig">
                                             ✓ Wel
                                         </button>
-                                        <button class="btn btn-sm btn-attendance <?= ($m['user_status'] ?? '') === 'afwezig' ? 'btn-danger' : 'btn-outline' ?>"
+                                        <button type="button" class="btn btn-sm btn-attendance <?= ($m['user_status'] ?? '') === 'afwezig' ? 'btn-danger' : 'btn-outline' ?>"
                                                 data-match-id="<?= $m['id'] ?>"
                                                 data-status="afwezig">
                                             ✕ Niet
@@ -89,7 +89,7 @@ $trainings = $trainingModel->getUpcoming(20, $userId);
                                         <?php else: ?>
                                             <span class="status-indicator badge badge-warning">? Nog opgeven</span>
                                         <?php endif; ?>
-                                    </div>
+                                    </form>
                                 </td>
                             <?php endif; ?>
                         </tr>
@@ -98,14 +98,14 @@ $trainings = $trainingModel->getUpcoming(20, $userId);
             </table>
         </div>
     <?php endif; ?>
-</div>
+</section>
 
 <!-- Trainingsschema -->
-<div class="card" style="margin-top: 2rem;">
-    <div class="card-header">
-        <h3>🏃 Trainingsschema</h3>
+<section class="card" style="margin-top: 2rem;" aria-labelledby="trainingsSectionTitle">
+    <header class="card-header">
+        <h3 id="trainingsSectionTitle">🏃 Trainingsschema</h3>
         <span class="badge badge-info"><?= count($trainings) ?> trainingen</span>
-    </div>
+    </header>
 
     <?php if (empty($trainings)): ?>
         <p style="color: var(--text-muted); padding: 1rem;">Geen komende trainingen gepland.</p>
@@ -114,10 +114,10 @@ $trainings = $trainingModel->getUpcoming(20, $userId);
             <table class="table">
                 <thead>
                     <tr>
-                        <th>Datum & Tijd</th>
-                        <th>Team</th>
-                        <th>Veld</th>
-                        <th>Focus / Omschrijving</th>
+                        <th scope="col">Datum & Tijd</th>
+                        <th scope="col">Team</th>
+                        <th scope="col">Veld</th>
+                        <th scope="col">Focus / Omschrijving</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -133,6 +133,6 @@ $trainings = $trainingModel->getUpcoming(20, $userId);
             </table>
         </div>
     <?php endif; ?>
-</div>
+</section>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

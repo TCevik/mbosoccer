@@ -52,62 +52,66 @@ $pageTitle = "Inschrijven als Lid";
 require_once __DIR__ . '/includes/header.php';
 ?>
 
-<div style="max-width: 540px; margin: 2rem auto;">
-    <div class="card">
-        <div class="card-header" style="justify-content: center; text-align: center; flex-direction: column;">
-            <h2>Inschrijven als lid</h2>
+<section style="max-width: 540px; margin: 2rem auto;" aria-labelledby="registerHeading">
+    <article class="card">
+        <header class="card-header" style="justify-content: center; text-align: center; flex-direction: column;">
+            <h2 id="registerHeading">Inschrijven als lid</h2>
             <p style="color: var(--text-muted); font-size: 0.88rem;">Meld je aan bij VV MBO Soccer</p>
-        </div>
+        </header>
 
         <?php if ($error): ?>
-            <div class="alert alert-danger">
+            <aside class="alert alert-danger" role="alert">
                 <span>⚠</span>
                 <p><?= e($error) ?></p>
-            </div>
+            </aside>
         <?php endif; ?>
 
         <form method="POST" action="/register.php">
-            <div class="form-group">
+            <p class="form-group">
                 <label for="name">Volledige Naam *</label>
                 <input type="text" id="name" name="name" class="form-control" required value="<?= e($_POST['name'] ?? '') ?>" placeholder="bijv. Jan Jansen">
-            </div>
+            </p>
 
-            <div class="form-group">
+            <p class="form-group">
                 <label for="email">E-mailadres *</label>
                 <input type="email" id="email" name="email" class="form-control" required value="<?= e($_POST['email'] ?? '') ?>" placeholder="naam@voorbeeld.nl">
-            </div>
+            </p>
 
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="phone">Telefoonnummer</label>
-                    <input type="tel" id="phone" name="phone" class="form-control" value="<?= e($_POST['phone'] ?? '') ?>" placeholder="0612345678">
-                </div>
+            <fieldset style="border: none; padding: 0; margin: 0;">
+                <div class="form-grid">
+                    <p class="form-group">
+                        <label for="phone">Telefoonnummer</label>
+                        <input type="tel" id="phone" name="phone" class="form-control" value="<?= e($_POST['phone'] ?? '') ?>" placeholder="0612345678">
+                    </p>
 
-                <div class="form-group">
-                    <label for="birthdate">Geboortedatum</label>
-                    <input type="date" id="birthdate" name="birthdate" class="form-control" value="<?= e($_POST['birthdate'] ?? '') ?>">
+                    <p class="form-group">
+                        <label for="birthdate">Geboortedatum</label>
+                        <input type="date" id="birthdate" name="birthdate" class="form-control" value="<?= e($_POST['birthdate'] ?? '') ?>">
+                    </p>
                 </div>
-            </div>
+            </fieldset>
 
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="password">Wachtwoord (min. 6 tekens) *</label>
-                    <input type="password" id="password" name="password" class="form-control" required placeholder="••••••••">
-                </div>
+            <fieldset style="border: none; padding: 0; margin: 0;">
+                <div class="form-grid">
+                    <p class="form-group">
+                        <label for="password">Wachtwoord (min. 6 tekens) *</label>
+                        <input type="password" id="password" name="password" class="form-control" required placeholder="••••••••">
+                    </p>
 
-                <div class="form-group">
-                    <label for="password_confirm">Bevestig Wachtwoord *</label>
-                    <input type="password" id="password_confirm" name="password_confirm" class="form-control" required placeholder="••••••••">
+                    <p class="form-group">
+                        <label for="password_confirm">Bevestig Wachtwoord *</label>
+                        <input type="password" id="password_confirm" name="password_confirm" class="form-control" required placeholder="••••••••">
+                    </p>
                 </div>
-            </div>
+            </fieldset>
 
             <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Inschrijving Voltooien</button>
         </form>
 
-        <div style="margin-top: 1.5rem; text-align: center; font-size: 0.88rem; color: var(--text-muted);">
+        <footer style="margin-top: 1.5rem; text-align: center; font-size: 0.88rem; color: var(--text-muted);">
             Heb je al een account? <a href="/login.php"><strong>Hier inloggen</strong></a>
-        </div>
-    </div>
-</div>
+        </footer>
+    </article>
+</section>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

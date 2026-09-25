@@ -69,21 +69,21 @@ $pageTitle = "Teams & Opstellingen";
 require_once __DIR__ . '/../includes/header.php';
 ?>
 
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+<header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
     <div>
         <h2>Teams & Opstellingen</h2>
         <p style="color: var(--text-muted);">Beheer teamindelingen, rugnummers en posities.</p>
     </div>
-</div>
+</header>
 
 <div style="display: grid; grid-template-columns: 280px 1fr; gap: 1.5rem; align-items: start;">
     <!-- Teams Sidebar -->
-    <div>
-        <div class="card" style="padding: 1.25rem;">
-            <div class="card-header" style="padding-bottom: 0.5rem;">
+    <aside aria-label="Teams navigatie">
+        <section class="card" style="padding: 1.25rem;">
+            <header class="card-header" style="padding-bottom: 0.5rem;">
                 <h4>🏆 Onze Teams</h4>
-            </div>
-            <div style="display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1.25rem;">
+            </header>
+            <nav style="display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1.25rem;" aria-label="Team selectie">
                 <?php foreach ($allTeams as $t): ?>
                     <a href="/admin/teams.php?view_team=<?= $t['id'] ?>" 
                        class="btn <?= $t['id'] === $selectedTeamId ? 'btn-primary' : 'btn-outline' ?>"
@@ -92,7 +92,7 @@ require_once __DIR__ . '/../includes/header.php';
                         <small style="margin-left: auto; opacity: 0.8;"><?= (int)$t['player_count'] ?>p</small>
                     </a>
                 <?php endforeach; ?>
-            </div>
+            </nav>
 
             <!-- Nieuw team formulier (alleen medewerker) -->
             <?php if ($user['role'] === 'medewerker'): ?>
@@ -100,47 +100,49 @@ require_once __DIR__ . '/../includes/header.php';
                 <h5 style="margin-bottom: 0.75rem;">+ Nieuw Team Aanmaken</h5>
                 <form method="POST" action="/admin/teams.php">
                     <input type="hidden" name="action" value="create_team">
-                    <div class="form-group">
-                        <input type="text" name="name" class="form-control" placeholder="Teamnaam (bijv. O17-1)" required>
-                    </div>
-                    <div class="form-group">
-                        <input type="text" name="category" class="form-control" placeholder="Klasse (bijv. 2e Klasse)" required>
-                    </div>
-                    <div class="form-group">
-                        <select name="trainer_id" class="form-control">
-                            <option value="">-- Kies Trainer --</option>
-                            <?php foreach ($allTrainers as $tr): ?>
-                                <option value="<?= $tr['id'] ?>"><?= e($tr['name']) ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
+                    <fieldset style="border: none; padding: 0; margin: 0;">
+                        <p class="form-group">
+                            <input type="text" name="name" class="form-control" placeholder="Teamnaam (bijv. O17-1)" required aria-label="Teamnaam">
+                        </p>
+                        <p class="form-group">
+                            <input type="text" name="category" class="form-control" placeholder="Klasse (bijv. 2e Klasse)" required aria-label="Klasse">
+                        </p>
+                        <p class="form-group">
+                            <select name="trainer_id" class="form-control" aria-label="Trainer selecteren">
+                                <option value="">-- Kies Trainer --</option>
+                                <?php foreach ($allTrainers as $tr): ?>
+                                    <option value="<?= $tr['id'] ?>"><?= e($tr['name']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </p>
+                    </fieldset>
                     <button type="submit" class="btn btn-secondary btn-sm" style="width: 100%;">Team Toevoegen</button>
                 </form>
             <?php endif; ?>
-        </div>
-    </div>
+        </section>
+    </aside>
 
     <!-- Team Details & Spelers -->
-    <div>
+    <main>
         <?php if ($currentTeam): ?>
-            <div class="card">
-                <div class="card-header">
+            <article class="card">
+                <header class="card-header">
                     <div>
                         <h3><?= e($currentTeam['name']) ?> (<?= e($currentTeam['category']) ?>)</h3>
                         <p style="color: var(--text-muted); font-size: 0.88rem;">
                             Trainer / Coach: <strong><?= e($currentTeam['trainer_name'] ?? 'Geen trainer toegewezen') ?></strong>
                         </p>
                     </div>
-                </div>
+                </header>
 
                 <!-- Speler toevoegen aan team -->
-                <div style="background: #f8fafc; padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1.5rem; border: 1px solid var(--border);">
-                    <h4 style="margin-bottom: 0.75rem;">Speler toevoegen aan selectie</h4>
+                <section style="background: #f8fafc; padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1.5rem; border: 1px solid var(--border);" aria-labelledby="addPlayerTitle">
+                    <h4 id="addPlayerTitle" style="margin-bottom: 0.75rem;">Speler toevoegen aan selectie</h4>
                     <form method="POST" action="/admin/teams.php?view_team=<?= $selectedTeamId ?>" style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
                         <input type="hidden" name="action" value="add_player">
                         
                         <div style="flex: 2; min-width: 200px;">
-                            <select name="user_id" class="form-control" required>
+                            <select name="user_id" class="form-control" required aria-label="Selecteer speler">
                                 <option value="">-- Selecteer Speler --</option>
                                 <?php foreach ($allUsers as $u): ?>
                                     <option value="<?= $u['id'] ?>"><?= e($u['name']) ?> (<?= e($u['email']) ?>)</option>
@@ -149,58 +151,60 @@ require_once __DIR__ . '/../includes/header.php';
                         </div>
 
                         <div style="flex: 1; min-width: 130px;">
-                            <input type="text" name="position" class="form-control" placeholder="Positie (bv. Spits)">
+                            <input type="text" name="position" class="form-control" placeholder="Positie (bv. Spits)" aria-label="Positie">
                         </div>
 
                         <div style="width: 100px;">
-                            <input type="number" name="shirt_number" class="form-control" placeholder="Rugnr">
+                            <input type="number" name="shirt_number" class="form-control" placeholder="Rugnr" aria-label="Rugnummer">
                         </div>
 
                         <button type="submit" class="btn btn-primary">+ Toevoegen</button>
                     </form>
-                </div>
+                </section>
 
                 <!-- Selectie Tabel -->
-                <h4>Huidige Selectie (<?= count($teamMembers) ?> spelers)</h4>
-                <div class="table-responsive" style="margin-top: 0.75rem;">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Rugnr</th>
-                                <th>Spelersnaam</th>
-                                <th>Positie</th>
-                                <th>Telefoon</th>
-                                <th>Actie</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php if (empty($teamMembers)): ?>
-                                <tr><td colspan="5" style="color: var(--text-muted);">Nog geen spelers toegevoegd aan dit team.</td></tr>
-                            <?php else: ?>
-                                <?php foreach ($teamMembers as $m): ?>
-                                    <tr>
-                                        <td><strong><?= $m['shirt_number'] ? '#' . $m['shirt_number'] : '-' ?></strong></td>
-                                        <td><strong><?= e($m['name']) ?></strong></td>
-                                        <td><span class="badge badge-info"><?= e($m['position'] ?? 'Speler') ?></span></td>
-                                        <td><?= e($m['phone'] ?: '-') ?></td>
-                                        <td>
-                                            <form method="POST" action="/admin/teams.php?view_team=<?= $selectedTeamId ?>" onsubmit="return confirm('Speler uit team verwijderen?');" style="display:inline;">
-                                                <input type="hidden" name="action" value="remove_player">
-                                                <input type="hidden" name="user_id" value="<?= $m['user_id'] ?>">
-                                                <button type="submit" class="btn btn-sm btn-outline-danger">Verwijderen</button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                <section aria-labelledby="currentRosterTitle">
+                    <h4 id="currentRosterTitle">Huidige Selectie (<?= count($teamMembers) ?> spelers)</h4>
+                    <div class="table-responsive" style="margin-top: 0.75rem;">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Rugnr</th>
+                                    <th scope="col">Spelersnaam</th>
+                                    <th scope="col">Positie</th>
+                                    <th scope="col">Telefoon</th>
+                                    <th scope="col">Actie</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php if (empty($teamMembers)): ?>
+                                    <tr><td colspan="5" style="color: var(--text-muted);">Nog geen spelers toegevoegd aan dit team.</td></tr>
+                                <?php else: ?>
+                                    <?php foreach ($teamMembers as $m): ?>
+                                        <tr>
+                                            <td><strong><?= $m['shirt_number'] ? '#' . $m['shirt_number'] : '-' ?></strong></td>
+                                            <td><strong><?= e($m['name']) ?></strong></td>
+                                            <td><span class="badge badge-info"><?= e($m['position'] ?? 'Speler') ?></span></td>
+                                            <td><?= e($m['phone'] ?: '-') ?></td>
+                                            <td>
+                                                <form method="POST" action="/admin/teams.php?view_team=<?= $selectedTeamId ?>" onsubmit="return confirm('Speler uit team verwijderen?');" style="display:inline;">
+                                                    <input type="hidden" name="action" value="remove_player">
+                                                    <input type="hidden" name="user_id" value="<?= $m['user_id'] ?>">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger">Verwijderen</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </article>
         <?php else: ?>
             <p>Geen team geselecteerd.</p>
         <?php endif; ?>
-    </div>
+    </main>
 </div>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
