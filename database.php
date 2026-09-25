@@ -1,31 +1,30 @@
 <?php
-$host = "localhost";    // naam van de host
-$dbname = "db";     // naam van de database
-$username = "root";     // gebruikersnaam van de database
-$password = "supergeheim";         // wachtwoord van de database
+// database.php - Backward compatibility / snelle test script
+require_once __DIR__ . '/config/Database.php';
 
-// Maak een nieuwe PDO-verbinding met de database
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-    $query = "SELECT * FROM users";
+    $pdo = Database::getConnection();
+    $query = "SELECT id, name, email, role FROM users";
     $statement = $pdo->query($query);
     $users = $statement->fetchAll();
 
+    echo "<h2>MBO Soccer - Database Verbinding Test</h2>";
+    echo "<p style='color: green;'>✓ Succesvol verbonden via Singleton Database (PDO)!</p>";
+    
     if (count($users) > 0) {
+        echo "<ul>";
         foreach ($users as $user) {
-            echo "user ID: " . $user['id'] . ", username: " . $user['username'] . ", password: " . $user['password'] . "<br>";
+            echo "<li><strong>" . htmlspecialchars($user['name']) . "</strong> (" . htmlspecialchars($user['email']) . ") - Rol: " . htmlspecialchars($user['role']) . "</li>";
         }
+        echo "</ul>";
     } else {
-
-        echo "no users found in the database.";
+        echo "<p>Geen gebruikers gevonden in de database.</p>";
     }
 } catch (PDOException $e) {
     // handle errors
     echo "foutmelding: " . $e->getMessage();
 } 
     // close connection
-    $pdo = null; 
+    $pdo = null;
 
 ?>
