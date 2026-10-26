@@ -1,9 +1,12 @@
 <?php
-// admin/matches.php - Wedstrijden CRUD (toevoegen, wijzigen, verwijderen)
+// admin/matches.php
+// Beheert de wedstrijden: toevoegen, wijzigen en verwijderen.
+
 require_once __DIR__ . '/../includes/auth_check.php';
 require_once __DIR__ . '/../classes/MatchGame.php';
 require_once __DIR__ . '/../classes/Team.php';
 
+// Alleen medewerkers en trainers mogen bij wedstrijdbeheer
 requireRole(['medewerker', 'trainer']);
 
 $matchModel = new MatchGame();
@@ -14,23 +17,26 @@ $action = $_GET['action'] ?? 'list';
 $editId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $matchData = null;
 
+// Als we een wedstrijd bewerken, halen we eerst de bestaande gegevens op
 if ($editId > 0) {
     $matchData = $matchModel->findById($editId);
 }
 
-// POST acties: Opslaan / Bijwerken / Verwijderen
+// POST-verzoeken afhandelen (opslaan of verwijderen)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $postAction = $_POST['form_action'] ?? '';
+    $formAction = $_POST['form_action'] ?? '';
 
-    if ($postAction === 'delete') {
-        $delId = (int)$_POST['id'];
-        $matchModel->delete($delId);
-        $_SESSION['flash_success'] = 'Wedstrijd is succesvol verwijderd.';
+    // 1. Wedstrijd verwijderen
+    if ($formAction === 'delete') {
+        $id = (int)$_POST['id'];
+        $matchModel->delete($id);
+        $_SESSION['flash_success'] = 'Wedstrijd verwijderd.';
         header("Location: /admin/matches.php");
         exit;
     }
 
-    if ($postAction === 'save') {
+    // 2. Wedstrijd opslaan (nieuw of bewerken)
+    if ($formAction === 'save') {
         $teamId = (int)$_POST['team_id'];
         $opponent = trim($_POST['opponent'] ?? '');
         $matchDate = $_POST['match_date'] ?? '';
@@ -39,146 +45,144 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $status = $_POST['status'] ?? 'Gepland';
         $notes = trim($_POST['notes'] ?? '');
 
-        if ($teamId <= 0 || empty($opponent) || empty($matchDate)) {
-            $_SESSION['flash_error'] = 'Vul alle verplichte velden in.';
-        } else {
+        // Validatie van verplichte velden
+        if ($teamId > 0 && $opponent && $matchDate) {
             if ($editId > 0) {
+                // Bestaande wedstrijd updaten
                 $matchModel->update($editId, $teamId, $opponent, $matchDate, $location, $fieldNumber, $status, $notes);
-                $_SESSION['flash_success'] = 'Wedstrijd succesvol bijgewerkt.';
+                $_SESSION['flash_success'] = 'Wedstrijd bijgewerkt.';
             } else {
+                // Nieuwe wedstrijd aanmaken
                 $matchModel->create($teamId, $opponent, $matchDate, $location, $fieldNumber, $notes);
-                $_SESSION['flash_success'] = 'Nieuwe wedstrijd ingepland.';
+                $_SESSION['flash_success'] = 'Nieuwe wedstrijd aangemaakt.';
             }
             header("Location: /admin/matches.php");
             exit;
+        } else {
+            $_SESSION['flash_error'] = 'Vul alle verplichte velden in.';
         }
     }
 }
 
+// Alle wedstrijden ophalen voor de tabel
 $allMatches = $matchModel->getAll();
 $pageTitle = "Wedstrijdbeheer";
 require_once __DIR__ . '/../includes/header.php';
 ?>
 
-<header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
     <div>
         <h2>Wedstrijdbeheer</h2>
-        <p style="color: var(--text-muted);">Voeg wedstrijden toe, wijzig tijden/velden of verwijder afgelaste duels.</p>
+        <p style="color: var(--text-muted);">Wedstrijden inplannen, aanpassen of verwijderen.</p>
     </div>
-    <nav aria-label="Wedstrijd acties">
+    <div>
         <?php if ($action === 'create' || $action === 'edit'): ?>
-            <a href="/admin/matches.php" class="btn btn-outline">← Terug naar overzicht</a>
+            <a href="/admin/matches.php" class="btn btn-outline">← Terug naar lijst</a>
         <?php else: ?>
-            <a href="/admin/matches.php?action=create" class="btn btn-primary">+ Nieuwe Wedstrijd Toevoegen</a>
+            <a href="/admin/matches.php?action=create" class="btn btn-primary">+ Nieuwe Wedstrijd</a>
         <?php endif; ?>
-    </nav>
-</header>
+    </div>
+</div>
 
+<!-- Scherm voor aanmaken of bewerken -->
 <?php if ($action === 'create' || $action === 'edit'): ?>
-    <!-- Formulier Nieuw / Bewerken -->
-    <article class="card" style="max-width: 700px; margin: 0 auto;">
+    <article class="card" style="max-width: 650px; margin: 0 auto;">
         <header class="card-header">
-            <h3><?= $action === 'edit' ? 'Wedstrijd Wijzigen' : 'Nieuwe Wedstrijd Inplannen' ?></h3>
+            <h3><?= $action === 'edit' ? 'Wedstrijd Bewerken' : 'Nieuwe Wedstrijd Plannen' ?></h3>
         </header>
 
         <form method="POST" action="/admin/matches.php<?= $editId ? '?id=' . $editId : '' ?>">
             <input type="hidden" name="form_action" value="save">
 
-            <fieldset style="border: none; padding: 0; margin: 0;">
-                <div class="form-grid">
-                    <p class="form-group">
-                        <label for="team_id">Eigen Team *</label>
-                        <select name="team_id" id="team_id" class="form-control" required>
-                            <option value="">-- Selecteer Team --</option>
-                            <?php foreach ($teams as $t): ?>
-                                <option value="<?= $t['id'] ?>" <?= ($matchData && $matchData['team_id'] == $t['id']) ? 'selected' : '' ?>>
-                                    <?= e($t['name']) ?> (<?= e($t['category']) ?>)
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </p>
-
-                    <p class="form-group">
-                        <label for="opponent">Tegenstander *</label>
-                        <input type="text" id="opponent" name="opponent" class="form-control" required 
-                               value="<?= e($matchData['opponent'] ?? '') ?>" placeholder="bijv. FC Amsterdam">
-                    </p>
-                </div>
-
-                <div class="form-grid">
-                    <p class="form-group">
-                        <label for="match_date">Datum en Tijd *</label>
-                        <input type="datetime-local" id="match_date" name="match_date" class="form-control" required
-                               value="<?= $matchData ? date('Y-m-d\TH:i', strtotime($matchData['match_date'])) : '' ?>">
-                    </p>
-
-                    <p class="form-group">
-                        <label for="location">Locatie (Thuis/Uit) *</label>
-                        <select name="location" id="location" class="form-control" required>
-                            <option value="Thuis" <?= ($matchData && $matchData['location'] === 'Thuis') ? 'selected' : '' ?>>Thuis</option>
-                            <option value="Uit" <?= ($matchData && $matchData['location'] === 'Uit') ? 'selected' : '' ?>>Uit</option>
-                        </select>
-                    </p>
-                </div>
-
-                <div class="form-grid">
-                    <p class="form-group">
-                        <label for="field_number">Veldnummer / Accommodatie</label>
-                        <input type="text" id="field_number" name="field_number" class="form-control" 
-                               value="<?= e($matchData['field_number'] ?? 'Veld 1') ?>">
-                    </p>
-
-                    <?php if ($action === 'edit'): ?>
-                        <p class="form-group">
-                            <label for="status">Status</label>
-                            <select name="status" id="status" class="form-control">
-                                <option value="Gepland" <?= $matchData['status'] === 'Gepland' ? 'selected' : '' ?>>Gepland</option>
-                                <option value="Gespeeld" <?= $matchData['status'] === 'Gespeeld' ? 'selected' : '' ?>>Gespeeld</option>
-                                <option value="Afgelast" <?= $matchData['status'] === 'Afgelast' ? 'selected' : '' ?>>Afgelast</option>
-                            </select>
-                        </p>
-                    <?php endif; ?>
-                </div>
+            <div class="form-grid">
+                <p class="form-group">
+                    <label for="team_id">Team *</label>
+                    <select name="team_id" id="team_id" class="form-control" required>
+                        <option value="">-- Kies Team --</option>
+                        <?php foreach ($teams as $t): ?>
+                            <option value="<?= $t['id'] ?>" <?= ($matchData && $matchData['team_id'] == $t['id']) ? 'selected' : '' ?>>
+                                <?= e($t['name']) ?> (<?= e($t['category']) ?>)
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </p>
 
                 <p class="form-group">
-                    <label for="notes">Opmerkingen / Wedstrijdinformatie</label>
-                    <textarea name="notes" id="notes" class="form-control" rows="3" placeholder="bijv. Verzamelen om 13:00 in de kantine..."><?= e($matchData['notes'] ?? '') ?></textarea>
+                    <label for="opponent">Tegenstander *</label>
+                    <input type="text" id="opponent" name="opponent" class="form-control" required value="<?= e($matchData['opponent'] ?? '') ?>" placeholder="bijv. AFC Ajax">
                 </p>
-            </fieldset>
+            </div>
 
-            <footer style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1rem;">
+            <div class="form-grid">
+                <p class="form-group">
+                    <label for="match_date">Datum & Tijd *</label>
+                    <input type="datetime-local" id="match_date" name="match_date" class="form-control" required 
+                           value="<?= $matchData ? date('Y-m-d\TH:i', strtotime($matchData['match_date'])) : '' ?>">
+                </p>
+
+                <p class="form-group">
+                    <label for="location">Locatie (Thuis / Uit)</label>
+                    <select name="location" id="location" class="form-control">
+                        <option value="Thuis" <?= ($matchData && $matchData['location'] === 'Thuis') ? 'selected' : '' ?>>Thuis</option>
+                        <option value="Uit" <?= ($matchData && $matchData['location'] === 'Uit') ? 'selected' : '' ?>>Uit</option>
+                    </select>
+                </p>
+            </div>
+
+            <div class="form-grid">
+                <p class="form-group">
+                    <label for="field_number">Veld</label>
+                    <input type="text" id="field_number" name="field_number" class="form-control" value="<?= e($matchData['field_number'] ?? 'Veld 1') ?>">
+                </p>
+
+                <?php if ($action === 'edit'): ?>
+                    <p class="form-group">
+                        <label for="status">Status</label>
+                        <select name="status" id="status" class="form-control">
+                            <option value="Gepland" <?= ($matchData['status'] ?? '') === 'Gepland' ? 'selected' : '' ?>>Gepland</option>
+                            <option value="Gespeeld" <?= ($matchData['status'] ?? '') === 'Gespeeld' ? 'selected' : '' ?>>Gespeeld</option>
+                            <option value="Afgelast" <?= ($matchData['status'] ?? '') === 'Afgelast' ? 'selected' : '' ?>>Afgelast</option>
+                        </select>
+                    </p>
+                <?php endif; ?>
+            </div>
+
+            <p class="form-group">
+                <label for="notes">Opmerking</label>
+                <textarea name="notes" id="notes" class="form-control" rows="2" placeholder="Bijv. verzamelen om 13:00 uur..."><?= e($matchData['notes'] ?? '') ?></textarea>
+            </p>
+
+            <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem;">
                 <a href="/admin/matches.php" class="btn btn-outline">Annuleren</a>
-                <button type="submit" class="btn btn-primary"><?= $action === 'edit' ? 'Wijzigingen Opslaan' : 'Wedstrijd Aanmaken' ?></button>
-            </footer>
+                <button type="submit" class="btn btn-primary">Opslaan</button>
+            </div>
         </form>
     </article>
 
+<!-- Scherm met overzichtstabel -->
 <?php else: ?>
-    <!-- Overzichtstabel -->
-    <section class="card" aria-labelledby="allMatchesTitle">
+    <article class="card">
         <header class="card-header">
-            <h3 id="allMatchesTitle">Geplande & Gespeelde Wedstrijden</h3>
-            <search style="max-width: 250px;">
-                <input type="search" class="form-control" placeholder="Zoek wedstrijd..." data-table-filter="#adminMatchesTable" aria-label="Wedstrijden doorzoeken">
-            </search>
+            <h3>Overzicht Wedstrijden</h3>
+            <input type="search" class="form-control" placeholder="Zoek op team of tegenstander..." data-table-filter="#matchesTable" style="max-width: 250px;">
         </header>
 
         <div class="table-responsive">
-            <table class="table" id="adminMatchesTable">
+            <table class="table" id="matchesTable">
                 <thead>
                     <tr>
-                        <th scope="col">Datum</th>
-                        <th scope="col">Team</th>
-                        <th scope="col">Tegenstander</th>
-                        <th scope="col">Locatie / Veld</th>
-                        <th scope="col">Status</th>
-                        <th scope="col">Aanwezig</th>
-                        <th scope="col">Acties</th>
+                        <th>Datum</th>
+                        <th>Team</th>
+                        <th>Tegenstander</th>
+                        <th>Locatie</th>
+                        <th>Status</th>
+                        <th>Aanwezigheid</th>
+                        <th>Acties</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if (empty($allMatches)): ?>
-                        <tr><td colspan="7" style="color: var(--text-muted);">Er zijn nog geen wedstrijden aangemaakt.</td></tr>
+                        <tr><td colspan="7" style="color: var(--text-muted);">Geen wedstrijden gevonden.</td></tr>
                     <?php else: ?>
                         <?php foreach ($allMatches as $m): ?>
                             <tr>
@@ -192,17 +196,15 @@ require_once __DIR__ . '/../includes/header.php';
                                     </span>
                                 </td>
                                 <td>
-                                    <span class="badge badge-success"><?= (int)$m['present_count'] ?> wel</span>
-                                    <span class="badge badge-danger"><?= (int)$m['absent_count'] ?> niet</span>
+                                    <a href="/admin/attendance.php?match_id=<?= $m['id'] ?>" class="btn btn-sm btn-outline">Inzien</a>
                                 </td>
                                 <td>
-                                    <div style="display: flex; gap: 0.4rem;">
-                                        <a href="/admin/attendance.php?match_id=<?= $m['id'] ?>" class="btn btn-sm btn-outline" title="Aanwezigheid inzien">👥</a>
-                                        <a href="/admin/matches.php?action=edit&id=<?= $m['id'] ?>" class="btn btn-sm btn-outline">✏️</a>
-                                        <form method="POST" action="/admin/matches.php" onsubmit="return confirm('Weet je zeker dat je deze wedstrijd wilt verwijderen?');" style="display:inline;">
+                                    <div style="display: flex; gap: 0.3rem;">
+                                        <a href="/admin/matches.php?action=edit&id=<?= $m['id'] ?>" class="btn btn-sm btn-outline">Bewerken</a>
+                                        <form method="POST" action="/admin/matches.php" onsubmit="return confirm('Wedstrijd verwijderen?');" style="display:inline;">
                                             <input type="hidden" name="form_action" value="delete">
                                             <input type="hidden" name="id" value="<?= $m['id'] ?>">
-                                            <button type="submit" class="btn btn-sm btn-outline-danger">🗑️</button>
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">Verwijderen</button>
                                         </form>
                                     </div>
                                 </td>
@@ -212,7 +214,7 @@ require_once __DIR__ . '/../includes/header.php';
                 </tbody>
             </table>
         </div>
-    </section>
+    </article>
 <?php endif; ?>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>

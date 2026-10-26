@@ -1,99 +1,99 @@
 <?php
-// classes/MatchGame.php - OOP Wedstrijdbeheer (CRUD)
+// classes/MatchGame.php
+// Deze class regelt de wedstrijden: ophalen, toevoegen, aanpassen en verwijderen.
 
 require_once __DIR__ . '/../config/Database.php';
 
 class MatchGame {
-    private PDO $db;
+    private $db;
 
+    // Databaseverbinding starten
     public function __construct() {
-        $this->db = Database::getConnection();
+        $this->db = Database::connect();
     }
 
-    public function getAll(int $limit = 50, ?int $teamId = null): array {
-        $sql = "
-            SELECT m.*, t.name as team_name, t.category,
-                   (SELECT COUNT(*) FROM match_attendance ma WHERE ma.match_id = m.id AND ma.status = 'aanwezig') as present_count,
-                   (SELECT COUNT(*) FROM match_attendance ma WHERE ma.match_id = m.id AND ma.status = 'afwezig') as absent_count
-            FROM matches m
-            JOIN teams t ON m.team_id = t.id
-        ";
-        if ($teamId) {
-            $sql .= " WHERE m.team_id = :team_id ";
-        }
-        $sql .= " ORDER BY m.match_date ASC LIMIT " . (int)$limit;
-
-        if ($teamId) {
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute(['team_id' => $teamId]);
-        } else {
-            $stmt = $this->db->query($sql);
-        }
+    // Haalt alle wedstrijden op en koppelt de naam van het team
+    public function getAll(int $limit = 50) {
+        $stmt = $this->db->prepare("
+            SELECT m.*, t.name as team_name 
+            FROM matches m 
+            JOIN teams t ON m.team_id = t.id 
+            ORDER BY m.match_date ASC 
+            LIMIT :limit
+        ");
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
         return $stmt->fetchAll();
     }
 
-    public function getUpcoming(int $limit = 10, ?int $userId = null): array {
+    // Haalt alleen toekomstige wedstrijden op. Als $userId is meegegeven,
+    // halen we ook op of deze speler al 'aanwezig' of 'afwezig' heeft doorgegeven.
+    public function getUpcoming(int $limit = 20, $userId = null) {
         if ($userId) {
             $stmt = $this->db->prepare("
-                SELECT m.*, t.name as team_name,
-                       COALESCE(ma.status, 'onbekend') as user_status,
-                       ma.reason as user_reason
+                SELECT m.*, t.name as team_name, ma.status as user_status
                 FROM matches m
                 JOIN teams t ON m.team_id = t.id
-                JOIN team_members tm ON t.id = tm.team_id AND tm.user_id = :user_id
-                LEFT JOIN match_attendance ma ON m.id = ma.match_id AND ma.user_id = :user_id2
+                LEFT JOIN match_attendance ma ON m.id = ma.match_id AND ma.user_id = :user_id
                 WHERE m.match_date >= NOW()
                 ORDER BY m.match_date ASC
-                LIMIT " . (int)$limit
-            );
-            $stmt->execute(['user_id' => $userId, 'user_id2' => $userId]);
+                LIMIT :limit
+            ");
+            $stmt->bindValue(':user_id', (int)$userId, PDO::PARAM_INT);
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $stmt->execute();
             return $stmt->fetchAll();
         }
 
-        $stmt = $this->db->query("
-            SELECT m.*, t.name as team_name
-            FROM matches m
-            JOIN teams t ON m.team_id = t.id
-            WHERE m.match_date >= NOW()
-            ORDER BY m.match_date ASC
-            LIMIT " . (int)$limit
-        );
+        // Als er niemand is ingelogd
+        $stmt = $this->db->prepare("
+            SELECT m.*, t.name as team_name 
+            FROM matches m 
+            JOIN teams t ON m.team_id = t.id 
+            WHERE m.match_date >= NOW() 
+            ORDER BY m.match_date ASC 
+            LIMIT :limit
+        ");
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
         return $stmt->fetchAll();
     }
 
-    public function findById(int $id): ?array {
+    // Zoekt één specifieke wedstrijd op ID
+    public function findById(int $id) {
         $stmt = $this->db->prepare("
-            SELECT m.*, t.name as team_name
-            FROM matches m
-            JOIN teams t ON m.team_id = t.id
+            SELECT m.*, t.name as team_name 
+            FROM matches m 
+            JOIN teams t ON m.team_id = t.id 
             WHERE m.id = :id
         ");
         $stmt->execute(['id' => $id]);
-        $res = $stmt->fetch();
-        return $res ?: null;
+        return $stmt->fetch() ?: null;
     }
 
-    public function create(int $teamId, string $opponent, string $matchDate, string $location, string $fieldNumber, string $notes = ''): int {
+    // Voegt een nieuwe wedstrijd toe aan de planning
+    public function create(int $teamId, string $opponent, string $matchDate, string $location, string $fieldNumber = 'Veld 1', string $notes = '') {
         $stmt = $this->db->prepare("
-            INSERT INTO matches (team_id, opponent, match_date, location, field_number, notes)
+            INSERT INTO matches (team_id, opponent, match_date, location, field_number, notes) 
             VALUES (:team_id, :opponent, :match_date, :location, :field_number, :notes)
         ");
         $stmt->execute([
             'team_id' => $teamId,
             'opponent' => $opponent,
             'match_date' => $matchDate,
-            'location' => in_array($location, ['Thuis', 'Uit']) ? $location : 'Thuis',
+            'location' => $location,
             'field_number' => $fieldNumber,
             'notes' => $notes
         ]);
         return (int)$this->db->lastInsertId();
     }
 
-    public function update(int $id, int $teamId, string $opponent, string $matchDate, string $location, string $fieldNumber, string $status, string $notes = ''): bool {
+    // Werkt een bestaande wedstrijd bij (bijvoorbeeld gewijzigde tijd of uitslag)
+    public function update(int $id, int $teamId, string $opponent, string $matchDate, string $location, string $fieldNumber, string $status, string $notes = '') {
         $stmt = $this->db->prepare("
             UPDATE matches 
             SET team_id = :team_id, opponent = :opponent, match_date = :match_date, 
-                location = :location, field_number = :field_number, status = :status, notes = :notes
+                location = :location, field_number = :field_number, status = :status, notes = :notes 
             WHERE id = :id
         ");
         return $stmt->execute([
@@ -101,19 +101,21 @@ class MatchGame {
             'team_id' => $teamId,
             'opponent' => $opponent,
             'match_date' => $matchDate,
-            'location' => in_array($location, ['Thuis', 'Uit']) ? $location : 'Thuis',
+            'location' => $location,
             'field_number' => $fieldNumber,
-            'status' => in_array($status, ['Gepland', 'Gespeeld', 'Afgelast']) ? $status : 'Gepland',
+            'status' => $status,
             'notes' => $notes
         ]);
     }
 
-    public function delete(int $id): bool {
+    // Verwijdert een wedstrijd uit het schema
+    public function delete(int $id) {
         $stmt = $this->db->prepare("DELETE FROM matches WHERE id = :id");
         return $stmt->execute(['id' => $id]);
     }
 
-    public function getCount(): int {
+    // Telt het aantal wedstrijden voor het beheerdersdashboard
+    public function getCount() {
         return (int)$this->db->query("SELECT COUNT(*) FROM matches")->fetchColumn();
     }
 }

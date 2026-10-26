@@ -1,40 +1,49 @@
 <?php
-// classes/User.php - OOP Gebruikersmodel
+// classes/User.php
+// Deze class beheert alle gebruikers (leden, trainers, medewerkers) in de database.
 
 require_once __DIR__ . '/../config/Database.php';
 
 class User {
-    private PDO $db;
+    private $db;
 
+    // Bij het aanmaken van new User() halen we direct de databaseverbinding op
     public function __construct() {
-        $this->db = Database::getConnection();
+        $this->db = Database::connect();
     }
 
-    public function findById(int $id): ?array {
-        $stmt = $this->db->prepare("SELECT id, name, email, role, phone, birthdate, created_at FROM users WHERE id = :id");
+    // Zoekt een specifieke gebruiker op basis van ID
+    public function findById(int $id) {
+        $stmt = $this->db->prepare("SELECT * FROM users WHERE id = :id");
         $stmt->execute(['id' => $id]);
-        $user = $stmt->fetch();
-        return $user ?: null;
+        return $stmt->fetch() ?: null;
     }
 
-    public function findByEmail(string $email): ?array {
+    // Zoekt een gebruiker op basis van e-mailadres
+    public function findByEmail(string $email) {
         $stmt = $this->db->prepare("SELECT * FROM users WHERE email = :email");
         $stmt->execute(['email' => $email]);
-        $user = $stmt->fetch();
-        return $user ?: null;
+        return $stmt->fetch() ?: null;
     }
 
-    public function authenticate(string $email, string $password): ?array {
+    // Controleert inloggegevens: zoekt gebruiker op en verifieert het gehashte wachtwoord
+    public function authenticate(string $email, string $password) {
         $user = $this->findByEmail($email);
+        
+        // password_verify controleert of het ingetypte wachtwoord past bij de hash in de database
         if ($user && password_verify($password, $user['password'])) {
-            unset($user['password']);
+            unset($user['password']); // Haal de hash weg voordat we de gegevens bewaren
             return $user;
         }
         return null;
     }
 
-    public function register(string $name, string $email, string $password, string $role = 'lid', ?string $phone = null, ?string $birthdate = null): int {
-        $hashed = password_hash($password, PASSWORD_BCRYPT);
+    // Registreert een nieuw lid en hasht het wachtwoord veilig met bcrypt
+    public function register(string $name, string $email, string $password, string $role = 'lid', $phone = null, $birthdate = null) {
+        // Wachtwoord beveiligen tegen diefstal
+        $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
+
+        // Gegevens veilig invoegen met prepared statement
         $stmt = $this->db->prepare("
             INSERT INTO users (name, email, password, role, phone, birthdate) 
             VALUES (:name, :email, :password, :role, :phone, :birthdate)
@@ -42,15 +51,17 @@ class User {
         $stmt->execute([
             'name' => $name,
             'email' => $email,
-            'password' => $hashed,
-            'role' => in_array($role, ['lid', 'trainer', 'medewerker']) ? $role : 'lid',
-            'phone' => $phone,
-            'birthdate' => $birthdate ?: null,
+            'password' => $hashedPassword,
+            'role' => $role,
+            'phone' => $phone ?: null,
+            'birthdate' => $birthdate ?: null
         ]);
         return (int)$this->db->lastInsertId();
     }
 
-    public function updateProfile(int $id, string $name, ?string $phone, ?string $birthdate, ?string $newPassword = null): bool {
+    // Laat een ingelogde gebruiker zijn eigen gegevens of optioneel wachtwoord aanpassen
+    public function updateProfile(int $id, string $name, $phone = null, $birthdate = null, $newPassword = null) {
+        // Als de gebruiker een nieuw wachtwoord heeft ingevuld, hashen we dat ook
         if ($newPassword) {
             $hashed = password_hash($newPassword, PASSWORD_BCRYPT);
             $stmt = $this->db->prepare("
@@ -59,38 +70,42 @@ class User {
                 WHERE id = :id
             ");
             return $stmt->execute([
+                'id' => $id,
                 'name' => $name,
-                'phone' => $phone,
+                'phone' => $phone ?: null,
                 'birthdate' => $birthdate ?: null,
-                'password' => $hashed,
-                'id' => $id
-            ]);
-        } else {
-            $stmt = $this->db->prepare("
-                UPDATE users 
-                SET name = :name, phone = :phone, birthdate = :birthdate
-                WHERE id = :id
-            ");
-            return $stmt->execute([
-                'name' => $name,
-                'phone' => $phone,
-                'birthdate' => $birthdate ?: null,
-                'id' => $id
+                'password' => $hashed
             ]);
         }
+
+        // Zonder wachtwoordwijziging
+        $stmt = $this->db->prepare("
+            UPDATE users 
+            SET name = :name, phone = :phone, birthdate = :birthdate
+            WHERE id = :id
+        ");
+        return $stmt->execute([
+            'id' => $id,
+            'name' => $name,
+            'phone' => $phone ?: null,
+            'birthdate' => $birthdate ?: null
+        ]);
     }
 
-    public function getAll(string $roleFilter = ''): array {
-        if ($roleFilter && in_array($roleFilter, ['lid', 'trainer', 'medewerker'])) {
-            $stmt = $this->db->prepare("SELECT id, name, email, role, phone, birthdate, created_at FROM users WHERE role = :role ORDER BY name ASC");
+    // Haalt alle gebruikers op, optioneel gefilterd op rol (bijv. alleen 'lid' of 'trainer')
+    public function getAll(string $roleFilter = '') {
+        if ($roleFilter !== '') {
+            $stmt = $this->db->prepare("SELECT * FROM users WHERE role = :role ORDER BY name ASC");
             $stmt->execute(['role' => $roleFilter]);
             return $stmt->fetchAll();
         }
-        $stmt = $this->db->query("SELECT id, name, email, role, phone, birthdate, created_at FROM users ORDER BY name ASC");
+
+        $stmt = $this->db->query("SELECT * FROM users ORDER BY name ASC");
         return $stmt->fetchAll();
     }
 
-    public function updateUserAdmin(int $id, string $name, string $email, string $role, ?string $phone, ?string $birthdate): bool {
+    // Clubmedewerker kan gegevens en rol van een lid wijzigen
+    public function updateUserAdmin(int $id, string $name, string $email, string $role, $phone = null, $birthdate = null) {
         $stmt = $this->db->prepare("
             UPDATE users 
             SET name = :name, email = :email, role = :role, phone = :phone, birthdate = :birthdate
@@ -101,17 +116,19 @@ class User {
             'name' => $name,
             'email' => $email,
             'role' => $role,
-            'phone' => $phone,
+            'phone' => $phone ?: null,
             'birthdate' => $birthdate ?: null
         ]);
     }
 
-    public function delete(int $id): bool {
+    // Verwijdert een gebruiker uit de database
+    public function delete(int $id) {
         $stmt = $this->db->prepare("DELETE FROM users WHERE id = :id");
         return $stmt->execute(['id' => $id]);
     }
 
-    public function getCount(): int {
+    // Telt het totaal aantal gebruikers voor op het dashboard
+    public function getCount() {
         return (int)$this->db->query("SELECT COUNT(*) FROM users")->fetchColumn();
     }
 }

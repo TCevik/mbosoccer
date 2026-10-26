@@ -1,35 +1,38 @@
 <?php
-// config/Database.php - Singleton Database Verbinding via PDO
+// config/Database.php
+// Deze class regelt de verbinding met de MySQL database via PDO.
 
 class Database {
-    private static ?PDO $instance = null;
+    // Hier slaan we de verbinding in op, zodat we niet steeds een nieuwe verbinding openen
+    private static $conn = null;
 
-    private function __construct() {}
-    private function __clone() {}
+    // Deze functie maakt verbinding met de database als dat nog niet is gebeurd
+    public static function connect(): PDO {
+        if (self::$conn === null) {
+            // Gegevens van de database (draait in Docker)
+            $host = 'db';
+            $dbname = 'phples';
+            $username = 'root';
+            $password = 'supergeheim';
 
-    public static function getConnection(): PDO {
-        if (self::$instance === null) {
-            $host = getenv('DB_HOST') ?: 'db';
-            $port = getenv('DB_PORT') ?: '3306';
-            $dbname = getenv('DB_NAME') ?: 'phples';
-            $username = getenv('DB_USER') ?: 'root';
-            $password = getenv('DB_PASS') ?: 'supergeheim';
-
-            $dsn = "mysql:host={$host};port={$port};dbname={$dbname};charset=utf8mb4";
-            
-            $options = [
-                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::ATTR_EMULATE_PREPARES   => false, // Essentieel tegen SQL-injectie
-            ];
-
-            try {
-                self::$instance = new PDO($dsn, $username, $password, $options);
-            } catch (PDOException $e) {
-                // Toon veilige foutmelding
-                die("Database verbindingsfout: " . htmlspecialchars($e->getMessage()));
-            }
+            // Verbinding opbouwen met PDO
+            self::$conn = new PDO(
+                "mysql:host=$host;dbname=$dbname;charset=utf8mb4",
+                $username,
+                $password,
+                [
+                    // Zorgt dat fouten netjes als exceptions worden gemeld
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    // Zorgt dat data als gewone array met kolomnamen terugkomt
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+                ]
+            );
         }
-        return self::$instance;
+        return self::$conn;
+    }
+
+    // Extra functie zodat getConnection() hetzelfde doet als connect()
+    public static function getConnection(): PDO {
+        return self::connect();
     }
 }

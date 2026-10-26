@@ -1,20 +1,20 @@
 <?php
-// classes/Attendance.php - OOP Aanwezigheidsregistratie
+// classes/Attendance.php
+// Deze class regelt de aanwezigheid van spelers bij wedstrijden.
 
 require_once __DIR__ . '/../config/Database.php';
 
 class Attendance {
-    private PDO $db;
+    private $db;
 
+    // Databaseverbinding initialiseren
     public function __construct() {
-        $this->db = Database::getConnection();
+        $this->db = Database::connect();
     }
 
-    public function setStatus(int $matchId, int $userId, string $status, ?string $reason = null): bool {
-        if (!in_array($status, ['aanwezig', 'afwezig', 'onbekend'])) {
-            return false;
-        }
-
+    // Slaat de status op ('aanwezig' of 'afwezig') van een speler voor een specifieke wedstrijd.
+    // ON DUPLICATE KEY UPDATE zorgt ervoor dat een bestaande keuze netjes wordt overschreven.
+    public function setStatus(int $matchId, int $userId, string $status, $reason = null) {
         $stmt = $this->db->prepare("
             INSERT INTO match_attendance (match_id, user_id, status, reason)
             VALUES (:match_id, :user_id, :status, :reason)
@@ -30,23 +30,25 @@ class Attendance {
         ]);
     }
 
-    public function getAttendanceForMatch(int $matchId): array {
+    // Haalt voor een wedstrijd alle spelers van het team op, plus hun aanwezigheidsstatus
+    public function getAttendanceForMatch(int $matchId) {
         $stmt = $this->db->prepare("
             SELECT u.id as user_id, u.name, u.email, tm.position, tm.shirt_number,
-                   COALESCE(ma.status, 'onbekend') as status,
+                   IFNULL(ma.status, 'onbekend') as status,
                    ma.reason, ma.updated_at
             FROM matches m
             JOIN team_members tm ON m.team_id = tm.team_id
             JOIN users u ON tm.user_id = u.id
             LEFT JOIN match_attendance ma ON m.id = ma.match_id AND u.id = ma.user_id
             WHERE m.id = :match_id
-            ORDER BY ma.status DESC, u.name ASC
+            ORDER BY u.name ASC
         ");
         $stmt->execute(['match_id' => $matchId]);
         return $stmt->fetchAll();
     }
 
-    public function getStatsForMatch(int $matchId): array {
+    // Telt snel hoeveel spelers er aanwezig, afwezig of nog onbekend zijn
+    public function getStatsForMatch(int $matchId) {
         $stmt = $this->db->prepare("
             SELECT 
                 COUNT(*) as total_players,
@@ -59,7 +61,6 @@ class Attendance {
             WHERE m.id = :match_id
         ");
         $stmt->execute(['match_id' => $matchId]);
-        $res = $stmt->fetch();
-        return $res ?: ['total_players' => 0, 'present_count' => 0, 'absent_count' => 0, 'unknown_count' => 0];
+        return $stmt->fetch() ?: ['present_count' => 0, 'absent_count' => 0, 'unknown_count' => 0];
     }
 }

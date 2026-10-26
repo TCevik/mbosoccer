@@ -1,56 +1,59 @@
-// public/js/attendance.js - AJAX aanwezigheid direct bijwerken zonder herladen
-document.addEventListener('DOMContentLoaded', () => {
-    const attendanceButtons = document.querySelectorAll('.btn-attendance');
+// public/js/attendance.js
+// Regelt dat je op 'Wel' of 'Niet' aanwezig kunt klikken,
+// waarna fetch() dit direct naar de server stuurt zonder de pagina te herladen.
 
-    attendanceButtons.forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-            e.preventDefault();
+document.addEventListener('DOMContentLoaded', () => {
+    // Zoek alle aanwezigheidsknoppen op de pagina
+    const buttons = document.querySelectorAll('.btn-attendance');
+
+    buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Haal het wedstrijd-ID en de gekozen status ('aanwezig' of 'afwezig') uit de knop
             const matchId = btn.getAttribute('data-match-id');
             const status = btn.getAttribute('data-status');
-            const parentContainer = btn.closest('.attendance-actions');
+            const form = btn.closest('.attendance-actions');
 
-            try {
-                btn.disabled = true;
-                const formData = new FormData();
-                formData.append('match_id', matchId);
-                formData.append('status', status);
+            // Formulierdata klaarzetten om te versturen
+            const data = new FormData();
+            data.append('match_id', matchId);
+            data.append('status', status);
 
-                const res = await fetch('/api/set_attendance.php', {
-                    method: 'POST',
-                    body: formData
-                });
-                const data = await res.json();
-
-                if (data.success) {
-                    // Update active button state
-                    const allInGroup = parentContainer.querySelectorAll('.btn-attendance');
-                    allInGroup.forEach(b => {
+            // POST-verzoek sturen naar het PHP-endpoint
+            fetch('/api/set_attendance.php', {
+                method: 'POST',
+                body: data
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    // Stap 1: Knoppen resetten naar normale omranding
+                    form.querySelectorAll('.btn-attendance').forEach(b => {
                         b.classList.remove('btn-primary', 'btn-danger');
                         b.classList.add('btn-outline');
                     });
 
+                    // Stap 2: De aangeklikte knop actief kleuren (groen voor aanwezig, rood voor afwezig)
                     if (status === 'aanwezig') {
                         btn.classList.remove('btn-outline');
                         btn.classList.add('btn-primary');
-                    } else if (status === 'afwezig') {
+                    } else {
                         btn.classList.remove('btn-outline');
                         btn.classList.add('btn-danger');
                     }
 
-                    const badge = parentContainer.querySelector('.status-indicator');
+                    // Stap 3: Het tekst-labeltje bijwerken
+                    const badge = form.querySelector('.status-indicator');
                     if (badge) {
-                        badge.textContent = status === 'aanwezig' ? '✓ Aanwezig' : '✕ Afwezig';
-                        badge.className = `status-indicator badge ${status === 'aanwezig' ? 'badge-success' : 'badge-danger'}`;
+                        badge.textContent = (status === 'aanwezig') ? '✓ Aanwezig' : '✕ Afwezig';
+                        badge.className = 'status-indicator badge ' + (status === 'aanwezig' ? 'badge-success' : 'badge-danger');
                     }
                 } else {
-                    alert(data.error || 'Er is een fout opgetreden.');
+                    alert(result.error || 'Er ging iets fout.');
                 }
-            } catch (err) {
-                console.error(err);
-                alert('Kon status niet opslaan. Probeer opnieuw.');
-            } finally {
-                btn.disabled = false;
-            }
+            })
+            .catch(() => {
+                alert('Kon verbinding met de server niet tot stand brengen.');
+            });
         });
     });
 });

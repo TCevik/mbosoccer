@@ -1,26 +1,33 @@
 <?php
-// login.php - Inloggen
+// login.php
+// Behandelt het inloggen van leden, trainers en medewerkers.
+
 require_once __DIR__ . '/includes/auth_check.php';
 require_once __DIR__ . '/classes/User.php';
 
+// Als de bezoeker al is ingelogd, sturen we hem direct door naar home
 if (isLoggedIn()) {
     header("Location: /index.php");
     exit;
 }
 
 $error = '';
+
+// Stap 1: Kijken of het inlogformulier is verstuurd (POST methode)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
 
+    // Eenvoudige validatie: beide velden moeten ingevuld zijn
     if (empty($email) || empty($password)) {
         $error = 'Vul zowel je e-mailadres als wachtwoord in.';
     } else {
+        // Stap 2: Inloggegevens controleren via het User-model
         $userModel = new User();
         $authenticatedUser = $userModel->authenticate($email, $password);
 
         if ($authenticatedUser) {
-            // Sessie veilig vullen
+            // Stap 3: Gegevens opslaan in de PHP-sessie zodat de gebruiker ingelogd blijft
             $_SESSION['user_id'] = $authenticatedUser['id'];
             $_SESSION['user_name'] = $authenticatedUser['name'];
             $_SESSION['user_email'] = $authenticatedUser['email'];
@@ -28,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $_SESSION['flash_success'] = 'Welkom terug, ' . $authenticatedUser['name'] . '!';
             
-            // Redirect medewerkers direct naar dashboard of anders schema
+            // Medewerkers gaan naar het beheerpaneel, leden naar het schema
             if ($authenticatedUser['role'] === 'medewerker') {
                 header("Location: /admin/dashboard.php");
             } else {
@@ -53,6 +60,7 @@ require_once __DIR__ . '/includes/header.php';
             <p style="color: var(--text-muted); font-size: 0.88rem;">Toegang voor leden, trainers en medewerkers</p>
         </header>
 
+        <!-- Foutmelding tonen als er iets mis is gegaan -->
         <?php if ($error): ?>
             <aside class="alert alert-danger" role="alert" style="margin-bottom: 1rem;">
                 <span>⚠</span>
@@ -60,6 +68,7 @@ require_once __DIR__ . '/includes/header.php';
             </aside>
         <?php endif; ?>
 
+        <!-- Het inlogformulier -->
         <form method="POST" action="/login.php">
             <p class="form-group">
                 <label for="email">E-mailadres</label>
@@ -78,8 +87,9 @@ require_once __DIR__ . '/includes/header.php';
             Nog geen lid van MBO Soccer? <a href="/register.php"><strong>Schrijf je hier in</strong></a>
         </footer>
 
+        <!-- Handig overzichtje met inlogaccounts voor tijdens de demo/CGI -->
         <aside style="margin-top: 1.5rem; padding: 0.75rem; background: #f8fafc; border-radius: var(--radius-sm); font-size: 0.8rem; border: 1px dashed var(--border);">
-            <strong>Demo testaccounts:</strong><br>
+            <strong>Testaccounts voor docent / demo:</strong><br>
             • Beheerder: <code>admin@mbosoccer.nl</code> / <code>Admin123!</code><br>
             • Trainer: <code>trainer@mbosoccer.nl</code> / <code>Trainer123!</code><br>
             • Speler: <code>speler@mbosoccer.nl</code> / <code>Speler123!</code>

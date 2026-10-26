@@ -1,19 +1,25 @@
 <?php
-// profile.php - Eigen account beheren
+// profile.php
+// Hiermee kan een ingelogd lid zijn eigen gegevens bekijken en aanpassen.
+
 require_once __DIR__ . '/includes/auth_check.php';
 require_once __DIR__ . '/classes/User.php';
 require_once __DIR__ . '/classes/Team.php';
 
+// Alleen toegankelijk voor ingelogde gebruikers
 requireLogin();
 
 $userModel = new User();
 $teamModel = new Team();
+
+// Gegevens ophalen van het huidige ingelogde account
 $currentUserData = $userModel->findById($_SESSION['user_id']);
 $myTeams = $teamModel->getTeamsForUser($_SESSION['user_id']);
 
 $error = '';
 $success = '';
 
+// Stap 1: Kijken of het profielformulier is opgeslagen
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim($_POST['name'] ?? '');
     $phone = trim($_POST['phone'] ?? '');
@@ -21,13 +27,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $newPassword = $_POST['new_password'] ?? '';
     $confirmPassword = $_POST['confirm_password'] ?? '';
 
+    // Validatie
     if (empty($name)) {
         $error = 'Naam mag niet leeg zijn.';
     } elseif (!empty($newPassword) && strlen($newPassword) < 6) {
         $error = 'Nieuw wachtwoord moet minimaal 6 tekens bevatten.';
     } elseif (!empty($newPassword) && $newPassword !== $confirmPassword) {
-        $error = 'Wachtwoorden komen niet overeen.';
+        $error = 'De nieuwe wachtwoorden komen niet overeen.';
     } else {
+        // Stap 2: Gegevens bijwerken via het User model
         $updated = $userModel->updateProfile(
             $_SESSION['user_id'],
             $name,
@@ -37,8 +45,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         );
 
         if ($updated) {
-            $_SESSION['user_name'] = $name;
-            $success = 'Je profielgegevens zijn succesvol bijgewerkt.';
+            $_SESSION['user_name'] = $name; // Sessienaam updaten
+            $success = 'Je gegevens zijn succesvol bijgewerkt.';
             $currentUserData = $userModel->findById($_SESSION['user_id']);
         } else {
             $error = 'Kon profiel niet bijwerken. Probeer opnieuw.';
@@ -57,6 +65,7 @@ require_once __DIR__ . '/includes/header.php';
             <span class="role-badge role-<?= e($currentUserData['role']) ?>"><?= e(strtoupper($currentUserData['role'])) ?></span>
         </header>
 
+        <!-- Meldingen -->
         <?php if ($error): ?>
             <aside class="alert alert-danger" role="alert">
                 <span>⚠</span>
@@ -71,70 +80,67 @@ require_once __DIR__ . '/includes/header.php';
             </aside>
         <?php endif; ?>
 
+        <!-- Formulier eigen gegevens -->
         <form method="POST" action="/profile.php">
-            <fieldset style="border: none; padding: 0; margin: 0;">
-                <div class="form-grid">
-                    <p class="form-group">
-                        <label for="name">Volledige Naam</label>
-                        <input type="text" id="name" name="name" class="form-control" required value="<?= e($currentUserData['name']) ?>">
-                    </p>
+            <div class="form-grid">
+                <p class="form-group">
+                    <label for="name">Volledige Naam</label>
+                    <input type="text" id="name" name="name" class="form-control" required value="<?= e($currentUserData['name']) ?>">
+                </p>
 
-                    <p class="form-group">
-                        <label for="email">E-mailadres (onwijzigbaar)</label>
-                        <input type="email" id="email" class="form-control" disabled value="<?= e($currentUserData['email']) ?>" style="background: #f1f5f9;">
-                    </p>
-                </div>
+                <p class="form-group">
+                    <label for="email">E-mailadres (onwijzigbaar)</label>
+                    <input type="email" id="email" class="form-control" disabled value="<?= e($currentUserData['email']) ?>" style="background: #f1f5f9;">
+                </p>
+            </div>
 
-                <div class="form-grid">
-                    <p class="form-group">
-                        <label for="phone">Telefoonnummer</label>
-                        <input type="tel" id="phone" name="phone" class="form-control" value="<?= e($currentUserData['phone'] ?? '') ?>">
-                    </p>
+            <div class="form-grid">
+                <p class="form-group">
+                    <label for="phone">Telefoonnummer</label>
+                    <input type="tel" id="phone" name="phone" class="form-control" value="<?= e($currentUserData['phone'] ?? '') ?>">
+                </p>
 
-                    <p class="form-group">
-                        <label for="birthdate">Geboortedatum</label>
-                        <input type="date" id="birthdate" name="birthdate" class="form-control" value="<?= e($currentUserData['birthdate'] ?? '') ?>">
-                    </p>
-                </div>
-            </fieldset>
+                <p class="form-group">
+                    <label for="birthdate">Geboortedatum</label>
+                    <input type="date" id="birthdate" name="birthdate" class="form-control" value="<?= e($currentUserData['birthdate'] ?? '') ?>">
+                </p>
+            </div>
 
             <hr style="margin: 1.5rem 0; border: none; border-top: 1px solid var(--border);">
             
-            <fieldset style="border: none; padding: 0; margin: 0;">
-                <legend style="margin-bottom: 1rem; font-weight: 700; font-size: 1.1rem;">Wachtwoord wijzigen (optioneel)</legend>
-                <div class="form-grid">
-                    <p class="form-group">
-                        <label for="new_password">Nieuw Wachtwoord</label>
-                        <input type="password" id="new_password" name="new_password" class="form-control" placeholder="Leeg laten om te behouden">
-                    </p>
+            <h4 style="margin-bottom: 0.75rem;">Wachtwoord wijzigen (optioneel)</h4>
+            <div class="form-grid">
+                <p class="form-group">
+                    <label for="new_password">Nieuw Wachtwoord</label>
+                    <input type="password" id="new_password" name="new_password" class="form-control" placeholder="Leeg laten om te behouden">
+                </p>
 
-                    <p class="form-group">
-                        <label for="confirm_password">Bevestig Nieuw Wachtwoord</label>
-                        <input type="password" id="confirm_password" name="confirm_password" class="form-control" placeholder="Herhaal nieuw wachtwoord">
-                    </p>
-                </div>
-            </fieldset>
+                <p class="form-group">
+                    <label for="confirm_password">Herhaal Nieuw Wachtwoord</label>
+                    <input type="password" id="confirm_password" name="confirm_password" class="form-control" placeholder="Herhaal nieuw wachtwoord">
+                </p>
+            </div>
 
-            <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">Wijzigingen Opslaan</button>
+            <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">Gegevens Opslaan</button>
         </form>
     </article>
 
-    <!-- Mijn Teams -->
+    <!-- Overzicht van teams waar de speler in zit -->
     <article class="card">
         <header class="card-header">
-            <h3>Mijn Teams & Rol in het Veld</h3>
+            <h3>Mijn Teams</h3>
         </header>
         <?php if (empty($myTeams)): ?>
-            <p style="color: var(--text-muted);">Je bent momenteel nog niet ingedeeld bij een specifiek team. Neem contact op met de trainer of clubmedewerker.</p>
+            <p style="color: var(--text-muted);">Je bent momenteel nog niet ingedeeld bij een team. De trainer of beheerder kan je toevoegen.</p>
         <?php else: ?>
             <div class="table-responsive">
                 <table class="table">
                     <thead>
                         <tr>
-                            <th scope="col">Team</th>
-                            <th scope="col">Klasse</th>
-                            <th scope="col">Positie</th>
-                            <th scope="col">Rugnummer</th>
+                            <th>Team</th>
+                            <th>Klasse</th>
+                            <th>Positie</th>
+                            <th>Rugnummer</th>
                         </tr>
                     </thead>
                     <tbody>

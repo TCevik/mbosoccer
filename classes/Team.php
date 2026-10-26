@@ -1,27 +1,30 @@
 <?php
-// classes/Team.php - OOP Teambeheer
+// classes/Team.php
+// Deze class regelt alles rondom teams en de spelers die in een team zitten.
 
 require_once __DIR__ . '/../config/Database.php';
 
 class Team {
-    private PDO $db;
+    private $db;
 
+    // Databaseverbinding klaarzetten
     public function __construct() {
-        $this->db = Database::getConnection();
+        $this->db = Database::connect();
     }
 
-    public function getAll(): array {
+    // Haalt alle teams op inclusief de naam van de trainer
+    public function getAll() {
         $stmt = $this->db->query("
-            SELECT t.*, u.name as trainer_name,
-                   (SELECT COUNT(*) FROM team_members tm WHERE tm.team_id = t.id) as player_count
-            FROM teams t
-            LEFT JOIN users u ON t.trainer_id = u.id
+            SELECT t.*, u.name as trainer_name 
+            FROM teams t 
+            LEFT JOIN users u ON t.trainer_id = u.id 
             ORDER BY t.name ASC
         ");
         return $stmt->fetchAll();
     }
 
-    public function findById(int $id): ?array {
+    // Haalt één team op basis van het ID
+    public function findById(int $id) {
         $stmt = $this->db->prepare("
             SELECT t.*, u.name as trainer_name 
             FROM teams t 
@@ -29,11 +32,11 @@ class Team {
             WHERE t.id = :id
         ");
         $stmt->execute(['id' => $id]);
-        $team = $stmt->fetch();
-        return $team ?: null;
+        return $stmt->fetch() ?: null;
     }
 
-    public function create(string $name, string $category, ?int $trainerId): int {
+    // Voegt een nieuw team toe (naam, klasse en eventueel een trainer)
+    public function create(string $name, string $category, $trainerId = null) {
         $stmt = $this->db->prepare("
             INSERT INTO teams (name, category, trainer_id) 
             VALUES (:name, :category, :trainer_id)
@@ -46,38 +49,27 @@ class Team {
         return (int)$this->db->lastInsertId();
     }
 
-    public function update(int $id, string $name, string $category, ?int $trainerId): bool {
-        $stmt = $this->db->prepare("
-            UPDATE teams 
-            SET name = :name, category = :category, trainer_id = :trainer_id 
-            WHERE id = :id
-        ");
-        return $stmt->execute([
-            'id' => $id,
-            'name' => $name,
-            'category' => $category,
-            'trainer_id' => $trainerId ?: null
-        ]);
-    }
-
-    public function delete(int $id): bool {
+    // Verwijdert een team
+    public function delete(int $id) {
         $stmt = $this->db->prepare("DELETE FROM teams WHERE id = :id");
         return $stmt->execute(['id' => $id]);
     }
 
-    public function getMembers(int $teamId): array {
+    // Haalt alle spelers op die gekoppeld zijn aan dit specifieke team
+    public function getMembers(int $teamId) {
         $stmt = $this->db->prepare("
-            SELECT tm.id as member_id, tm.position, tm.shirt_number, u.id as user_id, u.name, u.email, u.phone
-            FROM team_members tm
-            JOIN users u ON tm.user_id = u.id
-            WHERE tm.team_id = :team_id
+            SELECT tm.*, u.name, u.email, u.phone 
+            FROM team_members tm 
+            JOIN users u ON tm.user_id = u.id 
+            WHERE tm.team_id = :team_id 
             ORDER BY tm.shirt_number ASC, u.name ASC
         ");
         $stmt->execute(['team_id' => $teamId]);
         return $stmt->fetchAll();
     }
 
-    public function addMember(int $teamId, int $userId, string $position = 'Speler', ?int $shirtNumber = null): bool {
+    // Voegt een speler toe aan een teamselectie (of werkt zijn rugnummer/positie bij)
+    public function addMember(int $teamId, int $userId, string $position = 'Speler', $shirtNumber = null) {
         $stmt = $this->db->prepare("
             INSERT INTO team_members (team_id, user_id, position, shirt_number)
             VALUES (:team_id, :user_id, :position, :shirt_number)
@@ -91,7 +83,8 @@ class Team {
         ]);
     }
 
-    public function removeMember(int $teamId, int $userId): bool {
+    // Verwijdert een speler uit het team
+    public function removeMember(int $teamId, int $userId) {
         $stmt = $this->db->prepare("DELETE FROM team_members WHERE team_id = :team_id AND user_id = :user_id");
         return $stmt->execute([
             'team_id' => $teamId,
@@ -99,12 +92,13 @@ class Team {
         ]);
     }
 
-    public function getTeamsForUser(int $userId): array {
+    // Haalt alle teams op waar een specifieke speler lid van is (voor op het profiel)
+    public function getTeamsForUser(int $userId) {
         $stmt = $this->db->prepare("
-            SELECT t.*, tm.position, tm.shirt_number
-            FROM teams t
-            JOIN team_members tm ON t.id = tm.team_id
-            WHERE tm.user_id = :user_id
+            SELECT t.*, tm.position, tm.shirt_number 
+            FROM teams t 
+            JOIN team_members tm ON t.id = tm.team_id 
+            WHERE tm.user_id = :user_id 
             ORDER BY t.name ASC
         ");
         $stmt->execute(['user_id' => $userId]);

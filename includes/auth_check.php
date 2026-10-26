@@ -1,14 +1,18 @@
 <?php
-// includes/auth_check.php - Authenticatie & Autorisatie helper
+// includes/auth_check.php
+// Handige hulpfuncties voor sessies, inloggen, rollen en beveiliging.
 
+// Start de sessie als die nog niet actief is
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// Kijkt of de bezoeker is ingelogd (staat user_id in de sessie?)
 function isLoggedIn(): bool {
     return isset($_SESSION['user_id']);
 }
 
+// Geeft de gegevens van de ingelogde gebruiker terug
 function currentUser(): ?array {
     if (!isLoggedIn()) {
         return null;
@@ -21,6 +25,7 @@ function currentUser(): ?array {
     ];
 }
 
+// Stuur de bezoeker naar het inlogscherm als hij nog niet is ingelogd
 function requireLogin(string $redirect = '/login.php'): void {
     if (!isLoggedIn()) {
         $_SESSION['flash_error'] = 'Je moet eerst inloggen om deze pagina te bekijken.';
@@ -29,11 +34,13 @@ function requireLogin(string $redirect = '/login.php'): void {
     }
 }
 
-function requireRole(array|string $roles, string $redirect = '/index.php'): void {
-    requireLogin();
+// Controleert of de gebruiker de juiste rol heeft (bijvoorbeeld alleen 'medewerker')
+function requireRole($roles, string $redirect = '/index.php'): void {
+    requireLogin(); // Eerst checken of iemand überhaupt is ingelogd
     $roles = (array)$roles;
     $currentRole = $_SESSION['user_role'] ?? 'lid';
     
+    // Als de rol niet in de toegestane lijst staat, stuur terug naar home
     if (!in_array($currentRole, $roles)) {
         $_SESSION['flash_error'] = 'Je hebt geen toegang tot deze pagina.';
         header("Location: $redirect");
@@ -41,17 +48,7 @@ function requireRole(array|string $roles, string $redirect = '/index.php'): void
     }
 }
 
-function csrf_token(): string {
-    if (empty($_SESSION['csrf_token'])) {
-        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-    }
-    return $_SESSION['csrf_token'];
-}
-
-function verify_csrf(?string $token): bool {
-    return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token ?? '');
-}
-
-function e(mixed $value): string {
+// XSS-beveiliging: zet speciale tekens om in veilige HTML zodat hackers geen scripts kunnen injecteren
+function e($value): string {
     return htmlspecialchars((string)($value ?? ''), ENT_QUOTES, 'UTF-8');
 }

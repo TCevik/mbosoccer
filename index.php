@@ -59,7 +59,7 @@ $allTeams = $teamModel->getAll();
         <span class="stat-icon" aria-hidden="true">⚡</span>
         <div>
             <strong class="stat-val">100%</strong>
-            <span class="stat-lbl">Digitaal & Veilig (OOP)</span>
+            <span class="stat-lbl">Sportiviteit</span>
         </div>
     </article>
 </section>

@@ -7,7 +7,7 @@
                     <span class="brand-badge">⚽</span>
                     <span class="brand-text">MBO <strong>SOCCER</strong></span>
                 </div>
-                <p>Dé digitale thuisbasis voor spelers, trainers en clubbeheerders. Ontwikkeld voor Webdev 3 – OOP 1.</p>
+                <p>Dé digitale thuisbasis voor spelers, trainers en clubbeheerders van VV MBO Soccer.</p>
             </section>
             <nav class="footer-col" aria-label="Voettekst navigatie">
                 <h4>Snelle links</h4>
