@@ -6,12 +6,12 @@
 -- speler@mbosoccer.nl  -> Speler123!
 
 INSERT INTO `users` (`id`, `name`, `email`, `password`, `role`, `phone`, `birthdate`) VALUES
-(1, 'Beheerder Club', 'admin@mbosoccer.nl', '$2y$10$wE99qFqfK9vH94W9J0nFLeL9rTq1n6x8mG6B4uU4qO9zYlqRmW79O', 'medewerker', '0612345678', '1985-04-12'),
-(2, 'Dennis van Dijk (Trainer)', 'trainer@mbosoccer.nl', '$2y$10$fW3CjC2r29wP1L5Qe.R7t.9Ekn5K3oO5k5bL1UvR9Y7.sU8fL8Xz2', 'trainer', '0687654321', '1990-09-20'),
-(3, 'Sem Jansen (Speler)', 'speler@mbosoccer.nl', '$2y$10$V6tC9F4vE.a6L/qW9H8Lp.jB0dK5m7qN5hZ8U9yL3Q2m1V4z7W6Xy', 'lid', '0623456789', '2004-03-15'),
-(4, 'Liam de Boer', 'liam@mbosoccer.nl', '$2y$10$V6tC9F4vE.a6L/qW9H8Lp.jB0dK5m7qN5hZ8U9yL3Q2m1V4z7W6Xy', 'lid', '0634567890', '2003-07-22'),
-(5, 'Milan Bakker', 'milan@mbosoccer.nl', '$2y$10$V6tC9F4vE.a6L/qW9H8Lp.jB0dK5m7qN5hZ8U9yL3Q2m1V4z7W6Xy', 'lid', '0645678901', '2004-11-05'),
-(6, 'Noah Visser', 'noah@mbosoccer.nl', '$2y$10$V6tC9F4vE.a6L/qW9H8Lp.jB0dK5m7qN5hZ8U9yL3Q2m1V4z7W6Xy', 'lid', '0656789012', '2003-01-18');
+(1, 'Beheerder Club', 'admin@mbosoccer.nl', '$2y$10$vRfVSfZRat0XO6FLurHwouzI96PWzdsV43EacohIewygUkpiw2J7K', 'medewerker', '0612345678', '1985-04-12'),
+(2, 'Dennis van Dijk (Trainer)', 'trainer@mbosoccer.nl', '$2y$10$NUj9Yltlo4mVFN8GbGBSGeg02l0GveIYX0Aai9vk3ApcXqXJIWX5m', 'trainer', '0687654321', '1990-09-20'),
+(3, 'Sem Jansen (Speler)', 'speler@mbosoccer.nl', '$2y$10$C53SeUiIUtZPl09nMoHH9.nplK75nUUkFTxjLvBUMFv1FPejtwkfu', 'lid', '0623456789', '2004-03-15'),
+(4, 'Liam de Boer', 'liam@mbosoccer.nl', '$2y$10$C53SeUiIUtZPl09nMoHH9.nplK75nUUkFTxjLvBUMFv1FPejtwkfu', 'lid', '0634567890', '2003-07-22'),
+(5, 'Milan Bakker', 'milan@mbosoccer.nl', '$2y$10$C53SeUiIUtZPl09nMoHH9.nplK75nUUkFTxjLvBUMFv1FPejtwkfu', 'lid', '0645678901', '2004-11-05'),
+(6, 'Noah Visser', 'noah@mbosoccer.nl', '$2y$10$C53SeUiIUtZPl09nMoHH9.nplK75nUUkFTxjLvBUMFv1FPejtwkfu', 'lid', '0656789012', '2003-01-18');
 
 -- Teams
 INSERT INTO `teams` (`id`, `name`, `category`, `trainer_id`) VALUES

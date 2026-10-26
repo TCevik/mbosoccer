@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   db:
     image: mysql:8.0
@@ -10,6 +8,8 @@ services:
       MYSQL_DATABASE: phples
     ports:
       - "3306:3306"
+    volumes:
+      - "./sql templates voor phpmyadmin:/docker-entrypoint-initdb.d"
 
   phpmyadmin:
     image: phpmyadmin:latest
